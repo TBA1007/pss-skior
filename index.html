@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSS SKIOR DIGITAL - Pengurusan Susu</title>
+    <title>PSS SKIOR DIGITAL - Laporan Bulanan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -54,11 +54,12 @@
                 <i class="fas fa-list-ul"></i> REKOD
             </button>
             <button onclick="switchView('rumusan')" id="nav-rumusan" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-white text-blue-900 border border-slate-200">
-                <i class="fas fa-chart-line"></i> LAPORAN
+                <i class="fas fa-file-invoice"></i> LAPORAN
             </button>
         </nav>
 
         <main class="max-w-6xl mx-auto px-4 mt-6">
+            <!-- Penandaan View -->
             <div id="view-kehadiran" class="space-y-6">
                 <div class="flex flex-col gap-3">
                     <div class="relative w-full">
@@ -67,13 +68,11 @@
                     </div>
                     
                     <div class="flex gap-2">
-                        <!-- Bulk Toggle Button -->
                         <button onclick="bulkToggle()" id="bulk-toggle-btn" class="flex-1 bg-slate-800 text-white px-4 py-5 rounded-3xl font-black text-xs flex items-center justify-center gap-2 hover:bg-slate-700 transition-all shadow-md">
                             <i class="fas fa-tasks"></i>
                             <span id="bulk-toggle-text">HADIR SEMUA</span>
                         </button>
                         
-                        <!-- Reset Daily Count Button -->
                         <button onclick="resetDailyCount()" class="bg-rose-100 text-rose-600 px-6 py-5 rounded-3xl font-black text-xs flex items-center justify-center gap-2 hover:bg-rose-200 transition-all shadow-md border border-rose-200">
                             <i class="fas fa-trash-alt"></i>
                             <span>PADAM SEMUA</span>
@@ -81,10 +80,7 @@
                     </div>
                 </div>
 
-                <!-- Class Filters -->
                 <div id="year-tabs" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar"></div>
-                
-                <!-- Student Grid -->
                 <div id="student-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
             </div>
 
@@ -96,7 +92,7 @@
                             <tr class="text-[10px] font-black text-slate-400 uppercase tracking-tighter bg-slate-50/50">
                                 <th class="px-6 py-4">Nama Murid</th>
                                 <th class="px-6 py-4">Kelas</th>
-                                <th class="px-6 py-4 text-center">Status</th>
+                                <th class="px-6 py-4 text-center">Status Hari Ini</th>
                             </tr>
                         </thead>
                         <tbody id="rekod-table-body" class="divide-y divide-slate-100"></tbody>
@@ -104,21 +100,49 @@
                 </div>
             </div>
 
-            <!-- Report View -->
-            <div id="view-rumusan" class="hidden space-y-4">
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <h2 class="text-xl font-black text-blue-900">Analisis Penerimaan</h2>
-                    <div class="flex gap-2">
-                        <button id="download-btn" onclick="exportToExcel()" class="bg-emerald-600 text-white px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2"><i class="fas fa-file-excel"></i> MUAT TURUN EXCEL</button>
+            <!-- Report View (Bulanan) -->
+            <div id="view-rumusan" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="text-center md:text-left">
+                            <h2 class="text-2xl font-black text-blue-900">Laporan Bulanan</h2>
+                            <p class="text-slate-500 text-xs uppercase font-bold tracking-widest mt-1">Pilih bulan untuk muat turun rekod</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                            <select id="report-month" class="w-full sm:w-auto bg-slate-50 border-2 border-slate-100 px-4 py-3 rounded-2xl font-bold text-sm outline-none focus:border-blue-500">
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Mac</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Jun</option>
+                                <option value="07">Julai</option>
+                                <option value="08">Ogos</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Disember</option>
+                            </select>
+                            <select id="report-year" class="w-full sm:w-auto bg-slate-50 border-2 border-slate-100 px-4 py-3 rounded-2xl font-bold text-sm outline-none focus:border-blue-500">
+                                <!-- Generasi Tahun Dinamik -->
+                            </select>
+                            <button onclick="exportMonthlyReport()" class="w-full sm:w-auto bg-emerald-600 text-white px-8 py-3 rounded-2xl text-xs font-black flex items-center justify-center gap-2 shadow-lg hover:bg-emerald-700 active:scale-95 transition-all">
+                                <i class="fas fa-download"></i> MUAT TURUN EXCEL
+                            </button>
+                        </div>
                     </div>
                 </div>
+
                 <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-slate-100">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                        <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Pratonton Kehadiran Bulan Ini</h3>
+                    </div>
                     <table class="w-full text-left">
                         <thead>
-                            <tr class="text-[10px] font-black text-slate-400 uppercase bg-slate-50">
+                            <tr class="text-[10px] font-black text-slate-400 uppercase bg-white">
                                 <th class="px-6 py-4">Nama Murid</th>
                                 <th class="px-6 py-4">Kelas</th>
-                                <th class="px-6 py-4 text-center">Kekerapan</th>
+                                <th class="px-6 py-4 text-center">Hadir Bulan Ini</th>
                             </tr>
                         </thead>
                         <tbody id="rumusan-table-body" class="divide-y divide-slate-100"></tbody>
@@ -133,16 +157,16 @@
         </div>
     </div>
 
-    <!-- Custom Modal Replacement for Alert/Confirm -->
+    <!-- Confirm Modal -->
     <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] p-8 max-w-sm w-full text-center shadow-2xl scale-95 transition-transform">
             <div class="w-20 h-20 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
             <h2 class="text-xl font-black text-slate-900 mb-2">Padam Rekod?</h2>
-            <p class="text-slate-500 text-sm mb-8">Tindakan ini akan mengosongkan semua tanda susu untuk hari ini sahaja. Teruskan?</p>
+            <p class="text-slate-500 text-sm mb-8">Tindakan ini akan memadam data hari ini. Teruskan?</p>
             <div class="flex flex-col gap-2">
-                <button id="modal-confirm-btn" class="w-full bg-rose-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Ya, Kosongkan</button>
+                <button id="modal-confirm-btn" class="w-full bg-rose-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Ya, Padam</button>
                 <button id="modal-cancel-btn" class="w-full bg-slate-100 text-slate-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Batal</button>
             </div>
         </div>
@@ -167,6 +191,7 @@
         const db = getFirestore(app);
         const appId = "pss-skior-digital-penerimaan";
 
+        // Senarai Murid (Sama seperti sebelumnya)
         const rawStudents = [
             { name: "KHADEEJA AFEEYA BINTI ISMAIL", class: "PPKI" },
             { name: "MUHAMMAD AMMAR FARISH BIN MOHD EMRY", class: "PPKI" },
@@ -396,7 +421,12 @@
         let attendanceData = {};
         let currentView = 'kehadiran';
         let currentYearFilter = 'ALL';
-        const dateKey = new Date().toISOString().split('T')[0];
+        
+        // Tarikh hari ini (YYYY-MM-DD)
+        const now = new Date();
+        const dateKey = now.toISOString().split('T')[0];
+        const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
+        const currentYear = now.getFullYear().toString();
 
         const getFilteredStudents = () => {
             const search = document.getElementById('search-input').value.toLowerCase();
@@ -405,32 +435,6 @@
                 const matchesTab = currentYearFilter === 'ALL' || s.class.startsWith(currentYearFilter);
                 return matchesSearch && matchesTab;
             });
-        };
-
-        const refreshUI = () => {
-            document.getElementById('total-students-ui').innerText = STUDENTS.length;
-            if (currentView === 'kehadiran') renderStudents();
-            if (currentView === 'rekod') renderRekod();
-            if (currentView === 'rumusan') renderRumusan();
-        };
-
-        const updateBulkToggleBtn = () => {
-            const filtered = getFilteredStudents();
-            if (filtered.length === 0) return;
-            
-            const today = attendanceData[dateKey] || {};
-            const allTicked = filtered.every(s => !!today[s.id]);
-            
-            const btnText = document.getElementById('bulk-toggle-text');
-            const btn = document.getElementById('bulk-toggle-btn');
-            
-            if (allTicked) {
-                btnText.innerText = "BATAL SEMUA";
-                btn.classList.replace('bg-slate-800', 'bg-rose-600');
-            } else {
-                btnText.innerText = "HADIR SEMUA";
-                btn.classList.replace('bg-rose-600', 'bg-slate-800');
-            }
         };
 
         const renderStudents = () => {
@@ -449,7 +453,6 @@
                     </div>
                 </div>
             `).join('');
-            
             updateBulkToggleBtn();
         };
 
@@ -463,12 +466,8 @@
             const filtered = getFilteredStudents();
             const today = attendanceData[dateKey] || {};
             const allTicked = filtered.every(s => !!today[s.id]);
-            
             const updates = { ...today };
-            filtered.forEach(s => {
-                updates[s.id] = !allTicked;
-            });
-
+            filtered.forEach(s => updates[s.id] = !allTicked);
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', dateKey), updates);
         };
 
@@ -476,25 +475,17 @@
             const modal = document.getElementById('confirm-modal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            
-            const confirmBtn = document.getElementById('modal-confirm-btn');
-            const cancelBtn = document.getElementById('modal-cancel-btn');
-            
-            const hideModal = () => {
+            document.getElementById('modal-confirm-btn').onclick = async () => {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', dateKey));
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             };
-
-            confirmBtn.onclick = async () => {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', dateKey));
-                hideModal();
+            document.getElementById('modal-cancel-btn').onclick = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
             };
-
-            cancelBtn.onclick = hideModal;
         };
 
-        window.setYearFilter = (y) => { currentYearFilter = y; renderTabs(); renderStudents(); };
-        
         window.switchView = (v) => {
             currentView = v;
             document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -505,20 +496,20 @@
             active.classList.replace('bg-white', 'bg-blue-600');
             active.classList.replace('text-blue-900', 'text-white');
             
-            document.getElementById('view-kehadiran').classList.add('hidden');
-            document.getElementById('view-rekod').classList.add('hidden');
-            document.getElementById('view-rumusan').classList.add('hidden');
-            document.getElementById(`view-${v}`).classList.remove('hidden');
+            ['kehadiran', 'rekod', 'rumusan'].forEach(view => {
+                document.getElementById(`view-${view}`).classList.toggle('hidden', view !== v);
+            });
             refreshUI();
         };
 
-        const renderTabs = () => {
-            const tabs = ['ALL', 'PPKI', '1', '2', '3', '4', '5', '6'];
-            document.getElementById('year-tabs').innerHTML = tabs.map(t => `
-                <button onclick="setYearFilter('${t}')" class="px-5 py-2 rounded-xl text-[10px] font-black border-2 whitespace-nowrap transition-all ${currentYearFilter === t ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-400 border-slate-100'}">
-                    ${t === 'ALL' ? 'SEMUA' : (t === 'PPKI' ? 'PPKI' : 'THN ' + t)}
-                </button>
-            `).join('');
+        const refreshUI = () => {
+            document.getElementById('total-students-ui').innerText = STUDENTS.length;
+            const count = Object.values(attendanceData[dateKey] || {}).filter(v => v === true).length;
+            document.getElementById('today-count-ui').innerText = count;
+
+            if (currentView === 'kehadiran') renderStudents();
+            if (currentView === 'rekod') renderRekod();
+            if (currentView === 'rumusan') renderRumusan();
         };
 
         const renderRekod = () => {
@@ -538,10 +529,14 @@
 
         const renderRumusan = () => {
             const counts = {};
-            Object.values(attendanceData).forEach(day => {
-                Object.entries(day).forEach(([id, status]) => {
-                    if (status) counts[id] = (counts[id] || 0) + 1;
-                });
+            const prefix = `${currentYear}-${currentMonth}`; // Filter bulan semasa sahaja
+            
+            Object.entries(attendanceData).forEach(([date, day]) => {
+                if (date.startsWith(prefix)) {
+                    Object.entries(day).forEach(([id, status]) => {
+                        if (status) counts[id] = (counts[id] || 0) + 1;
+                    });
+                }
             });
 
             document.getElementById('rumusan-table-body').innerHTML = STUDENTS.map(s => `
@@ -553,34 +548,87 @@
             `).join('');
         };
 
-        window.exportToExcel = () => {
-            const data = STUDENTS.map(s => {
+        window.exportMonthlyReport = () => {
+            const month = document.getElementById('report-month').value;
+            const year = document.getElementById('report-year').value;
+            const prefix = `${year}-${month}`;
+            
+            // Cari semua tarikh untuk bulan tersebut
+            const dates = Object.keys(attendanceData)
+                .filter(d => d.startsWith(prefix))
+                .sort();
+
+            if (dates.length === 0) {
+                document.getElementById('sync-text').innerText = "Tiada data bulan dipilih";
+                setTimeout(() => document.getElementById('sync-text').innerText = "Sistem Sedia", 2000);
+                return;
+            }
+
+            const excelData = STUDENTS.map(s => {
                 const row = { 'Nama Murid': s.name, 'Kelas': s.class };
-                Object.keys(attendanceData).forEach(date => {
-                    row[date] = attendanceData[date][s.id] ? 'HADIR' : '-';
+                let totalHadir = 0;
+                dates.forEach(date => {
+                    const status = attendanceData[date][s.id] ? 'HADIR' : '-';
+                    row[date] = status;
+                    if (status === 'HADIR') totalHadir++;
                 });
+                row['JUMLAH HADIR'] = totalHadir;
                 return row;
             });
-            const ws = XLSX.utils.json_to_sheet(data);
+
+            const ws = XLSX.utils.json_to_sheet(excelData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Rekod PSS");
-            XLSX.writeFile(wb, `REKOD_PSS_SKIOR_${dateKey}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Bulanan");
+            XLSX.writeFile(wb, `LAPORAN_PSS_SKIOR_${month}_${year}.xlsx`);
         };
 
-        const setupListeners = () => {
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => {
-                attendanceData = {};
-                snap.forEach(d => attendanceData[d.id] = d.data());
-                const count = Object.values(attendanceData[dateKey] || {}).filter(v => v === true).length;
-                document.getElementById('today-count-ui').innerText = count;
-                refreshUI();
-            });
+        const updateBulkToggleBtn = () => {
+            const filtered = getFilteredStudents();
+            if (filtered.length === 0) return;
+            const today = attendanceData[dateKey] || {};
+            const allTicked = filtered.every(s => !!today[s.id]);
+            const btnText = document.getElementById('bulk-toggle-text');
+            const btn = document.getElementById('bulk-toggle-btn');
+            btnText.innerText = allTicked ? "BATAL SEMUA" : "HADIR SEMUA";
+            btn.classList.toggle('bg-rose-600', allTicked);
+            btn.classList.toggle('bg-slate-800', !allTicked);
+        };
+
+        window.setYearFilter = (y) => { currentYearFilter = y; renderTabs(); renderStudents(); };
+        
+        const renderTabs = () => {
+            const tabs = ['ALL', 'PPKI', '1', '2', '3', '4', '5', '6'];
+            document.getElementById('year-tabs').innerHTML = tabs.map(t => `
+                <button onclick="setYearFilter('${t}')" class="px-5 py-2 rounded-xl text-[10px] font-black border-2 whitespace-nowrap transition-all ${currentYearFilter === t ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-400 border-slate-100'}">
+                    ${t === 'ALL' ? 'SEMUA' : (t === 'PPKI' ? 'PPKI' : 'THN ' + t)}
+                </button>
+            `).join('');
         };
 
         const init = async () => {
-            document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('ms-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+            document.getElementById('current-date-display').innerText = now.toLocaleDateString('ms-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+            
+            // Inisialisasi dropdown tahun
+            const yearSelect = document.getElementById('report-year');
+            const startYear = 2024;
+            for(let y = startYear; y <= now.getFullYear(); y++) {
+                const opt = document.createElement('option');
+                opt.value = y; opt.innerText = y;
+                if(y === now.getFullYear()) opt.selected = true;
+                yearSelect.appendChild(opt);
+            }
+            document.getElementById('report-month').value = currentMonth;
+
             await signInAnonymously(auth);
-            onAuthStateChanged(auth, (u) => { if(u) setupListeners(); });
+            onAuthStateChanged(auth, (u) => { 
+                if(u) {
+                    onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => {
+                        attendanceData = {};
+                        snap.forEach(d => attendanceData[d.id] = d.data());
+                        refreshUI();
+                    });
+                } 
+            });
             renderTabs();
             document.getElementById('search-input').addEventListener('input', renderStudents);
         };
