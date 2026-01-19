@@ -4,55 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PSS SKIOR DIGITAL - Pengurusan Susu</title>
-    <!-- Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- SheetJS for Excel Download -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .student-card { transition: all 0.15s ease-out; cursor: pointer; user-select: none; }
+        .student-card:active { transform: scale(0.96); }
+        #bulk-modal { backdrop-filter: blur(4px); transition: all 0.2s ease; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-24">
 
-    <!-- App Container -->
     <div id="app">
-        <!-- Header Premium -->
+        <!-- Header -->
         <header class="bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 text-white p-6 shadow-xl sticky top-0 z-50 border-b-4 border-amber-400">
-            <div class="max-w-6xl mx-auto flex flex-col items-center">
+            <div class="max-w-6xl mx-auto flex flex-col items-center text-center">
                 <div class="flex items-center gap-3 mb-4">
                     <i class="fas fa-prescription-bottle-alt text-3xl text-amber-300"></i>
                     <h1 class="text-2xl md:text-3xl font-black tracking-tight uppercase">PSS SKIOR DIGITAL</h1>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4 w-full max-w-sm mb-4">
-                    <div class="bg-white/10 rounded-2xl p-3 text-center border border-white/20">
+                    <div class="bg-white/10 rounded-2xl p-3 border border-white/20">
                         <span class="block text-[10px] text-amber-400 font-bold uppercase tracking-widest">Jumlah Murid</span>
-                        <span id="total-students" class="text-2xl font-black">219</span>
+                        <span id="total-students-ui" class="text-2xl font-black">218</span>
                     </div>
-                    <div class="bg-white/10 rounded-2xl p-3 text-center border border-white/20">
-                        <span class="block text-[10px] text-amber-400 font-bold uppercase tracking-widest">Terima Hari Ini</span>
-                        <span id="today-count" class="text-2xl font-black text-amber-300">0</span>
+                    <div class="bg-white/10 rounded-2xl p-3 border border-white/20">
+                        <span class="block text-[10px] text-amber-400 font-bold uppercase tracking-widest">Susu Hari Ini</span>
+                        <span id="today-count-ui" class="text-2xl font-black text-amber-300">0</span>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2 text-[11px] font-bold bg-black/20 px-4 py-2 rounded-full border border-white/10 uppercase tracking-widest">
                     <i class="far fa-calendar-alt text-amber-400"></i>
-                    <span id="current-date-display">MEMUATKAN...</span>
+                    <span id="current-date-display">...</span>
                 </div>
             </div>
         </header>
 
-        <!-- Navigasi Utama -->
-        <nav class="max-w-4xl mx-auto flex justify-center gap-2 p-4 mt-4 overflow-x-auto no-scrollbar">
+        <!-- Navigation -->
+        <nav class="max-w-4xl mx-auto flex justify-center gap-2 p-4 mt-4 sticky top-[180px] z-40 bg-slate-50/90 backdrop-blur-md">
             <button onclick="switchView('kehadiran')" id="nav-kehadiran" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-blue-600 text-white shadow-lg">
                 <i class="fas fa-check-square"></i> PENANDAAN
             </button>
             <button onclick="switchView('rekod')" id="nav-rekod" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-white text-blue-900 border border-slate-200">
-                <i class="fas fa-list-ul"></i> REKOD HARIAN
+                <i class="fas fa-list-ul"></i> REKOD
             </button>
             <button onclick="switchView('rumusan')" id="nav-rumusan" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-white text-blue-900 border border-slate-200">
                 <i class="fas fa-chart-line"></i> LAPORAN
@@ -60,41 +60,40 @@
         </nav>
 
         <main class="max-w-6xl mx-auto px-4 mt-6">
-            
             <!-- VIEW: Penandaan -->
             <div id="view-kehadiran" class="space-y-6">
-                <div class="relative">
-                    <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input 
-                        type="text" 
-                        id="search-input"
-                        placeholder="Cari nama murid..."
-                        class="w-full pl-16 pr-6 py-5 bg-white rounded-3xl border-2 border-slate-100 shadow-sm focus:border-blue-500 outline-none text-lg transition-all"
-                        oninput="handleSearch()"
-                    >
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input 
+                            type="text" 
+                            id="search-input"
+                            placeholder="Cari nama murid..."
+                            class="w-full pl-16 pr-6 py-5 bg-white rounded-3xl border-2 border-slate-100 shadow-sm focus:border-blue-500 outline-none text-lg transition-all"
+                        >
+                    </div>
+                    <button onclick="toggleBulkModal(true)" class="bg-amber-500 hover:bg-amber-600 text-slate-900 px-6 py-4 rounded-3xl font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95">
+                        <i class="fas fa-check-double"></i> SEMUA HADIR
+                    </button>
                 </div>
 
                 <div id="year-tabs" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                    <!-- Tabs dijanakan oleh JS -->
+                    <!-- Tabs loaded from JS -->
                 </div>
 
-                <div id="student-groups-container" class="space-y-6">
-                    <!-- Kad kelas dijanakan oleh JS -->
+                <div id="student-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <!-- Cards loaded from JS -->
                 </div>
             </div>
 
             <!-- VIEW: Rekod Harian -->
             <div id="view-rekod" class="hidden">
                 <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-slate-100">
-                    <div class="p-6 bg-slate-50 border-b border-slate-100 font-black text-sm uppercase tracking-wider flex justify-between">
-                        <span>Senarai Penerima Susu</span>
-                        <span id="rekod-date" class="text-blue-600"></span>
-                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="text-[10px] font-black text-slate-400 uppercase tracking-tighter bg-slate-50/50">
-                                    <th class="px-6 py-4">Nama Penuh</th>
+                                    <th class="px-6 py-4">Nama Murid</th>
                                     <th class="px-6 py-4">Kelas</th>
                                     <th class="px-6 py-4 text-center">Status</th>
                                 </tr>
@@ -105,19 +104,22 @@
                 </div>
             </div>
 
-            <!-- VIEW: Rumusan Bulanan -->
+            <!-- VIEW: Rumusan -->
             <div id="view-rumusan" class="hidden space-y-4">
                 <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div>
                         <h2 class="text-xl font-black text-blue-900">Analisis Bulanan</h2>
-                        <p class="text-xs text-slate-400 font-bold">Kekerapan penerimaan susu mengikut murid</p>
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Jumlah susu yang diterima bulan ini</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <select id="month-selector" onchange="updateLaporan()" class="bg-slate-100 border-none rounded-xl px-4 py-2 font-black text-xs outline-none">
-                            <!-- Options dijanakan oleh JS -->
+                    <div class="flex gap-2">
+                        <select id="month-selector" class="bg-slate-100 border-none rounded-xl px-4 py-2 font-black text-xs outline-none">
+                            <option value="01">Januari</option><option value="02">Februari</option><option value="03">Mac</option>
+                            <option value="04">April</option><option value="05">Mei</option><option value="06">Jun</option>
+                            <option value="07">Julai</option><option value="08">Ogos</option><option value="09">September</option>
+                            <option value="10">Oktober</option><option value="11">November</option><option value="12">Disember</option>
                         </select>
-                        <button onclick="downloadExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shadow-lg shadow-emerald-100">
-                            <i class="fas fa-file-excel"></i> MUAT TURUN EXCEL
+                        <button id="download-btn" class="bg-emerald-600 text-white px-5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2">
+                            <i class="fas fa-file-excel"></i> EXCEL
                         </button>
                     </div>
                 </div>
@@ -137,20 +139,34 @@
             </div>
         </main>
 
+        <!-- Bulk Confirmation Modal -->
+        <div id="bulk-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-6 z-[200]">
+            <div class="bg-white rounded-[2.5rem] w-full max-w-sm p-8 shadow-2xl text-center">
+                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
+                    <i class="fas fa-question"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-2">Sahkan Semua Hadir?</h3>
+                <p class="text-xs text-slate-500 font-bold mb-8 leading-relaxed uppercase">Ini akan menandakan semua murid <span id="bulk-context-text" class="text-blue-600">di paparan sekarang</span> sebagai telah menerima susu.</p>
+                <div class="flex flex-col gap-3">
+                    <button onclick="markAllPresent()" class="bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 uppercase text-xs">Ya, Tandakan Semua</button>
+                    <button onclick="toggleBulkModal(false)" class="bg-slate-100 text-slate-500 font-black py-4 rounded-2xl hover:bg-slate-200 transition-colors uppercase text-xs">Batal</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Status Bar -->
         <div id="status-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-2 rounded-full text-[10px] font-bold shadow-2xl flex items-center gap-3 z-[100]">
-            <span id="sync-dot" class="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
-            <span id="sync-text">Menyambung...</span>
+            <span id="sync-dot" class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+            <span id="sync-text">Sedia</span>
         </div>
     </div>
 
-    <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- KONFIGURASI FIREBASE ---
+        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBqP2wFKLKUycJg4w8fS5bjxFMlwR8HfRk",
             authDomain: "rmt-digital.firebaseapp.com",
@@ -163,483 +179,346 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rmt-digital-pss';
+        const appId = "pss-skior-digital-penerimaan";
 
-        const MASTER_DATA = [
-                // DATA PPKI
-                { name: "KHADEEJA AFEEYA BINTI ISMAIL", class: "PPKI" },
-                { name: "MUHAMMAD AMMAR FARISH BIN MOHD EMRY", class: "PPKI" },
-                { name: "WAN SHAFIY BENJAMIN BIN WAN MOHD HAFIZULLAH", class: "PPKI" },
-                { name: "AHMAD ZIYAD AMZAR BIN ZAMRI", class: "PPKI" },
-                { name: "CHE NOR ASHIF BIN CHE MAT SOKRI", class: "PPKI" },
-                { name: "ISKANDAR ZAMAKHSHARY BIN ISKANDAR ZULKARNAIN", class: "PPKI" },
-                { name: "MUHAMMAD ADAM TAUFIQILLAH BIN MOHD FAIZAL", class: "PPKI" },
-                { name: "MUHAMMAD AQEEL NAUFAL BIN MOHD AZELAN", class: "PPKI" },
-                { name: "MUHAMMAD FIRAS DANISH BIN ABDUL HALIM", class: "PPKI" },
-                { name: "MUHAMMAD IFFAT NAFIS BIN MOHD IKHWAN NAIM", class: "PPKI" },
-                { name: "NUR ADZRAA QAIREENA BINTI AHMAD ZAKRI", class: "PPKI" },
-                { name: "UFAIRA NUR AFIFA BINTI MOHD HAFIZAN", class: "PPKI" },
-                { name: "ARWA BINTI ABDUL WAHAB", class: "PPKI" },
-                { name: "MUHAMAD RAZIQ BIN SOBRI SALAEH", class: "PPKI" },
-                { name: "MUHAMMAD AQIL ZIQRI BIN JUNAIDI", class: "PPKI" },
-                { name: "NUR ASMA IMANI BINTI ABDULLAH", class: "PPKI" },
-                { name: "NUR HAZIRAHUDA BINTI GHAZALI", class: "PPKI" },
-                { name: "NUR IMAN BINTI AHMAD ZAMURI", class: "PPKI" },
-                { name: "ADNIN AMIRAH IRDINA BINTI ZAMRI", class: "PPKI" },
-                { name: "AHMAD MUIZZUDDIN QAWIEM BIN AHMAD MUSABAQAH", class: "PPKI" },
-                { name: "AQIL HAZIQ BIN AMIR IBRAHIM", class: "PPKI" },
-                { name: "MUHAMAD IZZ IRFAN BIN KAMARUL ARIFIN", class: "PPKI" },
-                { name: "MUHAMAD RIZQIE DARWISH BIN ABDUL RAHMAN", class: "PPKI" },
-                { name: "MUHAMMAD AMMAR BIN KOSSIM", class: "PPKI" },
-                { name: "MUHAMMAD AQIF IMAN BIN MOHD", class: "PPKI" },
-                { name: "MUHAMMAD AQIFF HAIKAL BIN SIDI AHMAD", class: "PPKI" },
-                { name: "MUHAMMAD FIRASH AKRAM BIN AZHAR", class: "PPKI" },
-                { name: "MUHAMMAD MIKAIL DANISH BIN ABDUL HALIM", class: "PPKI" },
-                { name: "MUHAMMAD MIKAIL ISRAFIL BIN OSMAN", class: "PPKI" },
-                { name: "NUR AFIFAH ZAHIDAH BINTI ZAILANI", class: "PPKI" },
-                { name: "NUR QAIREEN QAISARA BINTI MUHAMMAD", class: "PPKI" },
-                { name: "PUTRA RAYYAN MIKAIL BIN NOR RAJU", class: "PPKI" },
-                { name: "RIZQI ASHRAF BIN IZMEER", class: "PPKI" },
+        // DATA: Complete 218 Students
+        const RAW_STUDENTS = [
+            { name: "KHADEEJA AFEEYA BINTI ISMAIL", class: "PPKI" }, { name: "MUHAMMAD AMMAR FARISH BIN MOHD EMRY", class: "PPKI" },
+            { name: "WAN SHAFIY BENJAMIN BIN WAN MOHD HAFIZULLAH", class: "PPKI" }, { name: "AHMAD ZIYAD AMZAR BIN ZAMRI", class: "PPKI" },
+            { name: "CHE NOR ASHIF BIN CHE MAT SOKRI", class: "PPKI" }, { name: "ISKANDAR ZAMAKHSHARY BIN ISKANDAR ZULKARNAIN", class: "PPKI" },
+            { name: "MUHAMMAD ADAM TAUFIQILLAH BIN MOHD FAIZAL", class: "PPKI" }, { name: "MUHAMMAD AQEEL NAUFAL BIN MOHD AZELAN", class: "PPKI" },
+            { name: "MUHAMMAD FIRAS DANISH BIN ABDUL HALIM", class: "PPKI" }, { name: "MUHAMMAD IFFAT NAFIS BIN MOHD IKHWAN NAIM", class: "PPKI" },
+            { name: "NUR ADZRAA QAIREENA BINTI AHMAD ZAKRI", class: "PPKI" }, { name: "UFAIRA NUR AFIFA BINTI MOHD HAFIZAN", class: "PPKI" },
+            { name: "ARWA BINTI ABDUL WAHAB", class: "PPKI" }, { name: "MUHAMAD RAZIQ BIN SOBRI SALAEH", class: "PPKI" },
+            { name: "MUHAMMAD AQIL ZIQRI BIN JUNAIDI", class: "PPKI" }, { name: "NUR ASMA IMANI BINTI ABDULLAH", class: "PPKI" },
+            { name: "NUR HAZIRAHUDA BINTI GHAZALI", class: "PPKI" }, { name: "NUR IMAN BINTI AHMAD ZAMURI", class: "PPKI" },
+            { name: "ADNIN AMIRAH IRDINA BINTI ZAMRI", class: "PPKI" }, { name: "AHMAD MUIZZUDDIN QAWIEM BIN AHMAD MUSABAQAH", class: "PPKI" },
+            { name: "AQIL HAZIQ BIN AMIR IBRAHIM", class: "PPKI" }, { name: "MUHAMAD IZZ IRFAN BIN KAMARUL ARIFIN", class: "PPKI" },
+            { name: "MUHAMAD RIZQIE DARWISH BIN ABDUL RAHMAN", class: "PPKI" }, { name: "MUHAMMAD AMMAR BIN KOSSIM", class: "PPKI" },
+            { name: "MUHAMMAD AQIF IMAN BIN MOHD", class: "PPKI" }, { name: "MUHAMMAD AQIFF HAIKAL BIN SIDI AHMAD", class: "PPKI" },
+            { name: "MUHAMMAD FIRASH AKRAM BIN AZHAR", class: "PPKI" }, { name: "MUHAMMAD MIKAIL DANISH BIN ABDUL HALIM", class: "PPKI" },
+            { name: "MUHAMMAD MIKAIL ISRAFIL BIN OSMAN", class: "PPKI" }, { name: "NUR AFIFAH ZAHIDAH BINTI ZAILANI", class: "PPKI" },
+            { name: "NUR QAIREEN QAISARA BINTI MUHAMMAD", class: "PPKI" }, { name: "PUTRA RAYYAN MIKAIL BIN NOR RAJU", class: "PPKI" },
+            { name: "RIZQI ASHRAF BIN IZMEER", class: "PPKI" },
+            { name: "NUR ARFA NADRAH BINTI MOHD DASUKI", class: "6 AFT" }, { name: "WAN NUR IRDINA ZULAIKHA BINTI MOHD HAIKAL", class: "6 AFT" },
+            { name: "AR RAYYAN FAWWAZ BIN AIDIL PUTRA", class: "6 AFQ" }, { name: "CHE WAN NUR AINA ZAFIRAH BINTI CHE WAN ZULKIFLI", class: "6 AFQ" },
+            { name: "MUHAMMAD AMMAR BIN AHMAD JAMARI", class: "6 AFQ" }, { name: "NUR DAYANA TIHANIE BINTI AHMAD", class: "6 AFQ" },
+            { name: "NUR DINI ZAHRAA BINTI HANAFFI", class: "6 AFQ" }, { name: "NUR SYARAH IZZATI BINTI MOHD FADZLI", class: "6 AFQ" },
+            { name: "NURIN QASRINA BINTI ZULFAHMI", class: "6 AFQ" }, { name: "SYAFIYAH BASHIRAH BINTI AHMAD NIZAM", class: "6 AFQ" },
+            { name: "THAQIF NASRULLAH BIN ZAKARIA", class: "6 AFQ" }, { name: "FATIN NOR HAYATI BINTI OTHMAN", class: "6 ANR" },
+            { name: "MUHAMMAD AMMAR RIZQI BIN MOHD NASRULLAH", class: "6 ANR" }, { name: "MUHAMMAD FAJAR BIN MOHD ZAINAL", class: "6 ANR" },
+            { name: "MUHAMMAD NOR HAQIF BIN MOHD NOOR", class: "6 ANR" }, { name: "NUR AINA BINTI MAZLAN", class: "6 ANR" },
+            { name: "NUR ASSYIFA' FATIHAH BINTI AB KARIM", class: "6 ANR" }, { name: "ROSE AIN AQILLA BINTI ALANG ISKANDAR", class: "6 ANR" },
+            { name: "ROSE QIERANA MUSTIQA BINTI NOR AZMI", class: "6 ANR" }, { name: "ARIANA DAMIA BINTI IMRAN", class: "6 ARR" },
+            { name: "ASHRAFF MUSTAQIM BIN AFENDI", class: "6 ARR" }, { name: "CHE KU IBRAHIM BIN CHEKU SULAIMAN", class: "6 ARR" },
+            { name: "MUHAMMAD AMSYAR ZAHIN BIN MOHD ZULADERA", class: "6 ARR" }, { name: "MUHAMMAD ARASH MURSYI BIN MOHD YASSIN", class: "6 ARR" },
+            { name: "MUHAMMAD ARASH MUZKYI BIN MOHD YASSIN", class: "6 ARR" }, { name: "MUHAMMAD NAZHAN DANISH BIN MOHD NIZRUL IDLAN", class: "6 ARR" },
+            { name: "MUHAMMAD NUR NAZMIRULLAH BIN MOHD RAFFI", class: "6 ARR" }, { name: "MUHAMMAD QAADIRAN NASRULLAH BIN KAMARULZAMAN", class: "6 ARR" },
+            { name: "MUHAMMAD QAUSAR FIQRI BIN MOHAMAD", class: "6 ARR" }, { name: "NUR AIERIS ILYANA BINTI NORAZMAN", class: "6 ARR" },
+            { name: "NUR AIMY SAFIYYA BINTI AHMAD FAIZAL", class: "6 ARR" }, { name: "NUR NAJWA AMNA BINTI RASID", class: "6 ARR" },
+            { name: "MUHAMMAD ALIF KAMIL BIN MOKTAR", class: "5 AFT" }, { name: "MUHAMMAD IMAN AQIL BIN ABDUL RAHMAN", class: "5 AFT" },
+            { name: "NUR AIN NURUL SHAHADAH BINTI JAFFAR", class: "5 AFT" }, { name: "NUR AMEERA SYAKIRA BINTI ISMAIL", class: "5 AFT" },
+            { name: "NUR QAYLA FAKHIRA BINTI ZAKARIA", class: "5 AFT" }, { name: "NUR SYAFIQAH BINTI SHAMSUL", class: "5 AFT" },
+            { name: "CHE WAN MUAMMAR MUHAIMIN BIN CHE WAN SUFLI RATMAN", class: "5 AFQ" }, { name: "MUHAMMAD HARAZZ HAKEEM BIN MOHD SALUSI", class: "5 AFQ" },
+            { name: "NUR AFZA IMANINA BINTI CHE KAMARUDIN", class: "5 AFQ" }, { name: "NUR ALISSA BALQIS BINTI MOHD SHAHFULRIZAN", class: "5 AFQ" },
+            { name: "NUR DELISHA QAIRA BINTI ABD RAHMAN", class: "5 AFQ" }, { name: "NUR FATHIA BINTI MUHAMAD FAIZAL", class: "5 AFQ" },
+            { name: "NUR SYAZA HUMAIRA BINTI SULAIMAN", class: "5 AFQ" }, { name: "PUTERI NURAISYA RANIA BINTI MOHD AZELAN", class: "5 AFQ" },
+            { name: "SITI NURNADHIRA BINTI MOHD NURHADI @ MUHAMMAD NAQIB", class: "5 AFQ" }, { name: "AHMAD ZACKHERY BIN MOKHZANI MIZAN", class: "5 ANR" },
+            { name: "MUHAMAD AQIL LUTHFY BIN MUHAMAD HAFIZ", class: "5 ANR" }, { name: "MUHAMMAD AQMAR AIMAN BIN MOHD.RADUAN", class: "5 ANR" },
+            { name: "MUHAMMAD FAWWAZ AMSYAR BIN MOHD YATIM", class: "5 ANR" }, { name: "MUHAMMAD SYAHMI BIN MOHD ZAILANI", class: "5 ANR" },
+            { name: "MUHAMMAD ZIKRY BIN MOHD JOHARI", class: "5 ANR" }, { name: "NUR AFINA UMAIRA BINTI AMIRULLAH", class: "5 ANR" },
+            { name: "NUR AIFA IRMANINA BINTI NORAZMAN", class: "5 ANR" }, { name: "NUR EMYZA WIDYANA BINTI ABDULLAH", class: "5 ANR" },
+            { name: "NURJANNAH AFRINA BINTI NORFAIZA", class: "5 ANR" }, { name: "NURUL ADYRA AZZAHRA BINTI MOHD HISYAM", class: "5 ANR" },
+            { name: "SYAZRIL BIN SAIFULLAH", class: "5 ANR" }, { name: "AHMAD PUTRA FAIZ BIN AHMAD FAIZAL", class: "5 ARR" },
+            { name: "ANNUR PUTRI AQILAH BINTI AHMAD ZAKI", class: "5 ARR" }, { name: "MOHAMAD LUTFI HAKIM BIN MOHD AZUAN", class: "5 ARR" },
+            { name: "MUHAMAD AMMAR ASHWAD BIN SUHAIMI", class: "5 ARR" }, { name: "MUHAMAD IRFAN MURSIDI BIN BAHARUDIN", class: "5 ARR" },
+            { name: "MUHAMAD RAMDAN RIZQI BIN HASRORIZAL", class: "5 ARR" }, { name: "MUHAMMAD LUTFI FAKHRULLAH BIN MUHAMAD ALHAFIS", class: "5 ARR" },
+            { name: "MUHAMMAD SYAH MUIZZ BIN IDRIS", class: "5 ARR" }, { name: "NIK NUR HUMAIRA BINTI NIK AZLAN", class: "5 ARR" },
+            { name: "NUR AISYA UMAIRAH BINTI ABDUL HAFIZ", class: "5 ARR" }, { name: "NUR FAZLIATUL AQIRRA BINTI YACCUB", class: "5 ARR" },
+            { name: "NUR HUSNA HUMAYRAA BINTI MOHD NASRI", class: "5 ARR" }, { name: "NUR ZULAIKHA SYAHIRAH BINTI ZAHARI", class: "5 ARR" },
+            { name: "NURIN DAMIA ALISYA BINTI MOHD IDZUAN", class: "5 ARR" }, { name: "TUAN NABIL NAJMIL BIN TUAN KAMARUL AZIZAN", class: "5 ARR" },
+            { name: "CHE NUR AINA NADHIRA BINTI CHE SAUFI", class: "4 AFT" }, { name: "HASNA QHAIRIYAH BINTI MOHAMAD RAHIMI", class: "4 AFT" },
+            { name: "MUHAMMAD FIRAS NAUFAL BIN ROSLI", class: "4 AFT" }, { name: "MUHAMMAD NAQIB SYAWAL HAFIY BIN MOHD KHAIRUDIN", class: "4 AFT" },
+            { name: "MUHAMMAD WAFIY ADHA BIN MAWARDI", class: "4 AFT" }, { name: "NAZIRAH AFINA ZAHIRA BINTI ABDUL AZIZ", class: "4 AFT" },
+            { name: "NUR AWATIF IRDINA BINTI ABDUL MANAF", class: "4 AFT" }, { name: "NUR RANIA ALISHA BINTI ABD RANI", class: "4 AFT" },
+            { name: "NUR SYASYA ARIANA BINTI SHAHRUL RIDHZUAN", class: "4 AFT" }, { name: "TUAN IRENE ARDINI BINTI TUAN AFIF", class: "4 AFT" },
+            { name: "AISH QUSYAIRI BIN AZIAN", class: "4 AFQ" }, { name: "DHIA NURAISYAH SAFIYYA BINTI MOHD FAIZOL", class: "4 AFQ" },
+            { name: "MUHAMMAD ADAM IQRAM BIN AHMAD AL-HAFIZ", class: "4 AFQ" }, { name: "MUHAMMAD IMAAN A'IZUDDIN BIN MOHD NASRULLAH", class: "4 AFQ" },
+            { name: "MUHAMMAD SHAHRUL NIDZMAN BIN BADROL HISHAM", class: "4 AFQ" }, { name: "NUR ALESHA QAISARA BINTI MOHD ZULADERA", class: "4 AFQ" },
+            { name: "NUR ARISSA SUMMAYAH BINTI MOHD SAFUWAN FATIHI", class: "4 AFQ" }, { name: "NUR DELISHA ADELIA BINTI MOHAMAD EZRI", class: "4 AFQ" },
+            { name: "NUR FASHA HUMAYRAA BINTI MOHD ZAINAL", class: "4 AFQ" }, { name: "NUR SYAFIA BINTI AHMAD FAIZA", class: "4 AFQ" },
+            { name: "PUTRI LARA ELYSHA BINTI MOHD SHARIFF", class: "4 AFQ" }, { name: "CHE MUHAMMAD IZZAT HARIS BIN CHE SAUFI", class: "4 ANR" },
+            { name: "MUHAMAD ADAM MUKHRIZ BIN ROSLI", class: "4 ANR" }, { name: "MUHAMAD RAYYAN NAUFAL BIN MAHZAR", class: "4 ANR" },
+            { name: "MUHAMMAD ADAM BIN MUHAMMAD JUNAIDE", class: "4 ANR" }, { name: "MUHAMMAD ADIB ZAFUAN BIN MD SUKRI", class: "4 ANR" },
+            { name: "MUHAMMAD AIRELL MIKHAIL BIN MOHD ROSLI", class: "4 ANR" }, { name: "MUHAMMAD AQIL RAYYAN BIN MOHAMMAD", class: "4 ANR" },
+            { name: "MUHAMMAD ZAFRI BIN MOHD ZAILANI", class: "4 ANR" }, { name: "NUR ADEENA NATASHA BINTI AB KARIM", class: "4 ANR" },
+            { name: "NUR ADRIANA KHALIESHA BINTI CHE WAN SUFLI RATMAN", class: "4 ANR" }, { name: "NUR ALEEYA QISTINA BINTI MOHAMMAD ROSDI", class: "4 ANR" },
+            { name: "NUR ARISA HUMAIRA BINTI MOHD KHAIRI", class: "4 ANR" }, { name: "NUR DAMIA SYAFIQAH BINTI MOHD RIDZWAN", class: "4 ANR" },
+            { name: "NURSYAFIQA BINTI MOHD KAMARUL AZMI", class: "4 ANR" }, { name: "WAN MUHAMMAD SYAFIQ BIN WAN ISMAIL", class: "4 ANR" },
+            { name: "WAN NUR ALEESYA BINTI WAN MOHD SHAFIQ", class: "4 ANR" }, { name: "AMMAR HAZIM BIN MOHD YASSIN", class: "4 ARR" },
+            { name: "MUHAMAD AFIQ BIN MOHD AZELI", class: "4 ARR" }, { name: "MUHAMMAD FAHEEM FARHAN BIN MOHD.FADZLI", class: "4 ARR" },
+            { name: "MUHAMMAD NUR IRFAN BIN MOHD RAFFI", class: "4 ARR" }, { name: "MUHAMMAD SHAKIR BIN ABDULLAH", class: "4 ARR" },
+            { name: "NIK NOOR AISYAH HUMAIRAH BINTI NIK AZMAN", class: "4 ARR" }, { name: "NUR AINA MAISARAH BINTI HASBULLAH", class: "4 ARR" },
+            { name: "NUR FARAH NABILA BINTI MOHAMAD FADIL", class: "4 ARR" }, { name: "NUR IMAN QAISARA BINTI ZAMRI", class: "4 ARR" },
+            { name: "NUR ISYADAH KHADIJAH BINTI MUHAMAD ALHAFIS", class: "4 ARR" }, { name: "NUR QAISARA IMAN BINTI JUNAIDI", class: "4 ARR" },
+            { name: "NURUL ASSYIFA AMNI BINTI MUHAMMAD AMER", class: "4 ARR" },
+            { name: "MUHAMMAD AMMAR ISYRAF BIN MOHD IKHWAN NAIM", class: "3 AFT" }, { name: "NUR ALISHA HUMAIRA BINTI ZULKIFLI", class: "3 AFT" },
+            { name: "MUHAMMAD IRFAN HAZIQ BIN MOHD ZAINI", class: "3 AFQ" }, { name: "NUR ADRIANA MAISARA BINTI KAMARUL ARIFIN", class: "3 AFQ" },
+            { name: "NUR FATHIA QISTINA BINTI ABDUL HALIM", class: "3 AFQ" }, { name: "NUR QALESYA DANIA BINTI MUHAMMAD", class: "3 AFQ" },
+            { name: "NURUL IMAN SYAFIQAH BINTI MAZLAN", class: "3 AFQ" }, { name: "WAN NUR IRDINA HUMAIRA BINTI WAN ISMAIL", class: "3 AFQ" },
+            { name: "MUHAMMAD AIRIEL HARRAZ BIN AHMAD FARHAN", class: "3 ANR" }, { name: "MUHAMMAD ALIF IKRAM BIN JAFFAR", class: "3 ANR" },
+            { name: "MUHAMMAD DANIAL BIN INFINITI", class: "3 ANR" }, { name: "MUHAMMAD RAIF BIN RUSDI", class: "3 ANR" },
+            { name: "NUR AIN SAKINAH BINTI MOHD DASUKI", class: "3 ANR" }, { name: "NUR AINUN NAJIHAH BINTI ABDULLAH", class: "3 ANR" },
+            { name: "NUR AWATIF IRDINA BINTI MOHD SHAHFULRIZAN", class: "3 ANR" }, { name: "NUR DAYANA MARISSA BINTI SHAHRUL RIDHZUAN", class: "3 ANR" },
+            { name: "NUR ZULAIKHA SYAFIA BINTI ZAHARI", class: "3 ANR" }, { name: "SITI NURSYAFIKAH BINTI MAT YUSOP", class: "3 ANR" },
+            { name: "FATIN NUR AMIRA BINTI ISMAIL", class: "3 ARR" }, { name: "MUHAMAD RAMADHAN BIN HASRORIZAL", class: "3 ARR" },
+            { name: "MUHAMMAD FAWWAZ DARWISY BIN ABDUL RAHMAN", class: "3 ARR" }, { name: "NUR FATIMAH BINTI MOHAMAD", class: "3 ARR" },
+            { name: "NUR HUWAIDA BINTI MOHD NASRI", class: "3 ARR" }, { name: "NUR NAZIFA HUMAIRA BINTI MOHD DASUKI", class: "3 ARR" },
+            { name: "NUR SYAZWANI DAMIA BINTI SHAMSUL", class: "3 ARR" }, { name: "WAN MUHAMMAD ADAM HAFIY BIN WAN MOHD HAFIZULLAH", class: "3 ARR" },
+            { name: "AIRA NUR QALESYA BINTI AB RANI", class: "2 AFT" }, { name: "NUR IMAN ZULAIKHA BINTI MOHAMAMAD EZRI", class: "2 AFT" },
+            { name: "NUR IRIS SYUHADA BINTI JAFFAR", class: "2 AFT" }, { name: "MUHAMMAD AIMAN SYAH BIN MOHD IDZUAN", class: "2 AFQ" },
+            { name: "MUHAMMAD HARITH FARHAN BIN MOHD.FADZLI", class: "2 AFQ" }, { name: "NUR ARISSA HUMAIRA BINTI MD SUKRI", class: "2 AFQ" },
+            { name: "NUR QAIRA BATRISYIA BINTI MOHD DASUKI", class: "2 AFQ" }, { name: "MUHAMMAD AMMAR RIZQI BIN SIDI AHMAD", class: "2 ANR" },
+            { name: "MUHAMMAD AZAMUDDIN BIN MOHD NASRULLAH", class: "2 ANR" }, { name: "MUHAMMAD SYAHMIL BIN MOHD ZAILANI", class: "2 ANR" },
+            { name: "NUR AIRIS AYRA BINTI ABD RAHMAN", class: "2 ANR" }, { name: "NUR FATIN SYAFIQAH BINTI ISMAIL", class: "2 ANR" },
+            { name: "NUR IRDINA BATRISYIA BINTI AHMAD JAMARI", class: "2 ANR" }, { name: "PUTERI NUR DELISHA BINTI MOHD AZELAN", class: "2 ANR" },
+            { name: "SYAIFUL ADLI BIN SYAIFUL ASRAF", class: "2 ANR" }, { name: "WAN NUR AWATIF BINTI WAN MOHD SHAFIQ", class: "2 ANR" },
+            { name: "MUHAMMAD QAID NASRULLAH BIN KAMARULZAMAN", class: "2 ARR" }, { name: "NUR AIN BALQIS BINTI ABDUL HAFIZ", class: "2 ARR" },
+            { name: "NUR DAYANA TIHANI BINTI ABDULLAH", class: "2 ARR" }, { name: "NUR QAIRA QISTINA BINTI MAZLAN", class: "2 ARR" },
+            { name: "NUR ALIYA MAISARA BINTI MOHD.RADUAN", class: "1 AFT" }, { name: "NUR MARDIANA BINTI MOHD DASUKI", class: "1 AFT" },
+            { name: "NUR ZARA ZULAIKHA BINTI MOHD KHAIRI", class: "1 AFT" }, { name: "MUHAMMAD ADAM MIKAIL BIN ROSLI", class: "1 AFQ" },
+            { name: "NUR AMNI AQILAH BINTI MUHAMMAD AMER", class: "1 AFQ" }, { name: "NUR IRIS AMANI BINTI ZULKIFLI", class: "1 AFQ" },
+            { name: "NUR QAIREENA SAFIYA BINTI MOHD SAFUWAN FATIHI", class: "1 AFQ" }, { name: "SITI NUR DAMIA HUMAIRAH BINTI MAT YUSOP", class: "1 AFQ" },
+            { name: "MUHAMMAD AQIL AQWAS BIN MOHD NURHADI @ MUHAMMAD NAQIB", class: "1 ANR" }, { name: "MUHAMMAD HARRAZ RIFQI BIN ROSLI", class: "1 ANR" },
+            { name: "NUR ANIQAH ARDANI BINTI ABDUL AZIZ", class: "1 ANR" }, { name: "NUR AQIFAH ZAHIDAH BINTI ZAILANI", class: "1 ANR" },
+            { name: "NUR IMANINA BINTI AMIR IBRAHIM", class: "1 ANR" }, { name: "SITI AISYAH BINTI MOHD DASUKI", class: "1 ANR" },
+            { name: "WAN NUR QASEH BINTI WAN MOHD SHAFIQ", class: "1 ANR" }, { name: "MUHAMAD ADAM HAZIM BIN SUHAIMI", class: "1 ARR" },
+            { name: "MUHAMMAD AMMAR ASHMAN BIN MOHD DASUKI", class: "1 ARR" }, { name: "NUR AMANI BINTI MUHAMMAD JUNAIDE", class: "1 ARR" },
+            { name: "NUR HUDA IMANI BINTI MOHD DASUKI", class: "1 ARR" }
+        ];
 
-                // DATA TAHUN 6
-                { name: "NUR ARFA NADRAH BINTI MOHD DASUKI", class: "6 AFT" },
-                { name: "WAN NUR IRDINA ZULAIKHA BINTI MOHD HAIKAL", class: "6 AFT" },
-                { name: "AR RAYYAN FAWWAZ BIN AIDIL PUTRA", class: "6 AFQ" },
-                { name: "CHE WAN NUR AINA ZAFIRAH BINTI CHE WAN ZULKIFLI", class: "6 AFQ" },
-                { name: "MUHAMMAD AMMAR BIN AHMAD JAMARI", class: "6 AFQ" },
-                { name: "NUR DAYANA TIHANIE BINTI AHMAD", class: "6 AFQ" },
-                { name: "NUR DINI ZAHRAA BINTI HANAFFI", class: "6 AFQ" },
-                { name: "NUR SYARAH IZZATI BINTI MOHD FADZLI", class: "6 AFQ" },
-                { name: "NURIN QASRINA BINTI ZULFAHMI", class: "6 AFQ" },
-                { name: "SYAFIYAH BASHIRAH BINTI AHMAD NIZAM", class: "6 AFQ" },
-                { name: "THAQIF NASRULLAH BIN ZAKARIA", class: "6 AFQ" },
-                { name: "FATIN NOR HAYATI BINTI OTHMAN", class: "6 ANR" },
-                { name: "MUHAMMAD AMMAR RIZQI BIN MOHD NASRULLAH", class: "6 ANR" },
-                { name: "MUHAMMAD FAJAR BIN MOHD ZAINAL", class: "6 ANR" },
-                { name: "MUHAMMAD NOR HAQIF BIN MOHD NOOR", class: "6 ANR" },
-                { name: "NUR AINA BINTI MAZLAN", class: "6 ANR" },
-                { name: "NUR ASSYIFA' FATIHAH BINTI AB KARIM", class: "6 ANR" },
-                { name: "ROSE AIN AQILLA BINTI ALANG ISKANDAR", class: "6 ANR" },
-                { name: "ROSE QIERANA MUSTIQA BINTI NOR AZMI", class: "6 ANR" },
-                { name: "ARIANA DAMIA BINTI IMRAN", class: "6 ARR" },
-                { name: "ASHRAFF MUSTAQIM BIN AFENDI", class: "6 ARR" },
-                { name: "CHE KU IBRAHIM BIN CHEKU SULAIMAN", class: "6 ARR" },
-                { name: "MUHAMMAD AMSYAR ZAHIN BIN MOHD ZULADERA", class: "6 ARR" },
-                { name: "MUHAMMAD ARASH MURSYI BIN MOHD YASSIN", class: "6 ARR" },
-                { name: "MUHAMMAD ARASH MUZKYI BIN MOHD YASSIN", class: "6 ARR" },
-                { name: "MUHAMMAD NAZHAN DANISH BIN MOHD NIZRUL IDLAN", class: "6 ARR" },
-                { name: "MUHAMMAD NUR NAZMIRULLAH BIN MOHD RAFFI", class: "6 ARR" },
-                { name: "MUHAMMAD QAADIRAN NASRULLAH BIN KAMARULZAMAN", class: "6 ARR" },
-                { name: "MUHAMMAD QAUSAR FIQRI BIN MOHAMAD", class: "6 ARR" },
-                { name: "NUR AIERIS ILYANA BINTI NORAZMAN", class: "6 ARR" },
-                { name: "NUR AIMY SAFIYYA BINTI AHMAD FAIZAL", class: "6 ARR" },
-                { name: "NUR NAJWA AMNA BINTI RASID", class: "6 ARR" },
+        const STUDENTS = RAW_STUDENTS.map((s, i) => ({
+            ...s,
+            id: `stu_${i.toString().padStart(3, '0')}`
+        })).sort((a, b) => a.name.localeCompare(b.name));
 
-                // DATA TAHUN 5
-                { name: "MUHAMMAD ALIF KAMIL BIN MOKTAR", class: "5 AFT" },
-                { name: "MUHAMMAD IMAN AQIL BIN ABDUL RAHMAN", class: "5 AFT" },
-                { name: "NUR AIN NURUL SHAHADAH BINTI JAFFAR", class: "5 AFT" },
-                { name: "NUR AMEERA SYAKIRA BINTI ISMAIL", class: "5 AFT" },
-                { name: "NUR QAYLA FAKHIRA BINTI ZAKARIA", class: "5 AFT" },
-                { name: "NUR SYAFIQAH BINTI SHAMSUL", class: "5 AFT" },
-                { name: "CHE WAN MUAMMAR MUHAIMIN BIN CHE WAN SUFLI RATMAN", class: "5 AFQ" },
-                { name: "MUHAMMAD HARAZZ HAKEEM BIN MOHD SALUSI", class: "5 AFQ" },
-                { name: "NUR AFZA IMANINA BINTI CHE KAMARUDIN", class: "5 AFQ" },
-                { name: "NUR ALISSA BALQIS BINTI MOHD SHAHFULRIZAN", class: "5 AFQ" },
-                { name: "NUR DELISHA QAIRA BINTI ABD RAHMAN", class: "5 AFQ" },
-                { name: "NUR FATHIAH BINTI MUHAMAD FAIZAL", class: "5 AFQ" },
-                { name: "NUR SYAZA HUMAIRA BINTI SULAIMAN", class: "5 AFQ" },
-                { name: "PUTERI NURAISYA RANIA BINTI MOHD AZELAN", class: "5 AFQ" },
-                { name: "SITI NURNADHIRA BINTI MOHD NURHADI @ MUHAMMAD NAQIB", class: "5 AFQ" },
-                { name: "AHMAD ZACKHERY BIN MOKHZANI MIZAN", class: "5 ANR" },
-                { name: "MUHAMAD AQIL LUTHFY BIN MUHAMAD HAFIZ", class: "5 ANR" },
-                { name: "MUHAMMAD AQMAR AIMAN BIN MOHD.RADUAN", class: "5 ANR" },
-                { name: "MUHAMMAD FAWWAZ AMSYAR BIN MOHD YATIM", class: "5 ANR" },
-                { name: "MUHAMMAD SYAHMI BIN MOHD ZAILANI", class: "5 ANR" },
-                { name: "MUHAMMAD ZIKRY BIN MOHD JOHARI", class: "5 ANR" },
-                { name: "NUR AFINA UMAIRA BINTI AMIRULLAH", class: "5 ANR" },
-                { name: "NUR AIFA IRMANINA BINTI NORAZMAN", class: "5 ANR" },
-                { name: "NUR EMYZA WIDYANA BINTI ABDULLAH", class: "5 ANR" },
-                { name: "NURJANNAH AFRINA BINTI NORFAIZA", class: "5 ANR" },
-                { name: "NURUL ADYRA AZZAHRA BINTI MOHD HISYAM", class: "5 ANR" },
-                { name: "SYAZRIL BIN SAIFULLAH", class: "5 ANR" },
-                { name: "AHMAD PUTRA FAIZ BIN AHMAD FAIZAL", class: "5 ARR" },
-                { name: "ANNUR PUTRI AQILAH BINTI AHMAD ZAKI", class: "5 ARR" },
-                { name: "MOHAMAD LUTFI HAKIM BIN MOHD AZUAN", class: "5 ARR" },
-                { name: "MUHAMAD AMMAR ASHWAD BIN SUHAIMI", class: "5 ARR" },
-                { name: "MUHAMAD IRFAN MURSIDI BIN BAHARUDIN", class: "5 ARR" },
-                { name: "MUHAMAD RAMDAN RIZQI BIN HASRORIZAL", class: "5 ARR" },
-                { name: "MUHAMMAD LUTFI FAKHRULLAH BIN MUHAMAD ALHAFIS", class: "5 ARR" },
-                { name: "MUHAMMAD SYAH MUIZZ BIN IDRIS", class: "5 ARR" },
-                { name: "NIK NUR HUMAIRA BINTI NIK AZLAN", class: "5 ARR" },
-                { name: "NUR AISYA UMAIRAH BINTI ABDUL HAFIZ", class: "5 ARR" },
-                { name: "NUR FAZLIATUL AQIRRA BINTI YACCUB", class: "5 ARR" },
-                { name: "NUR HUSNA HUMAYRAA BINTI MOHD NASRI", class: "5 ARR" },
-                { name: "NUR ZULAIKHA SYAHIRAH BINTI ZAHARI", class: "5 ARR" },
-                { name: "NURIN DAMIA ALISYA BINTI MOHD IDZUAN", class: "5 ARR" },
-                { name: "TUAN NABIL NAJMIL BIN TUAN KAMARUL AZIZAN", class: "5 ARR" },
+        let attendanceData = {}; 
+        let currentView = 'kehadiran';
+        let currentYearFilter = 'ALL';
+        let currentUser = null;
+        const dateKey = new Date().toISOString().split('T')[0];
 
-                // DATA TAHUN 4
-                { name: "CHE NUR AINA NADHIRA BINTI CHE SAUFI", class: "4 AFT" },
-                { name: "HASNA QHAIRIYAH BINTI MOHAMAD RAHIMI", class: "4 AFT" },
-                { name: "MUHAMMAD FIRAS NAUFAL BIN ROSLI", class: "4 AFT" },
-                { name: "MUHAMMAD NAQIB SYAWAL HAFIY BIN MOHD KHAIRUDIN", class: "4 AFT" },
-                { name: "MUHAMMAD WAFIY ADHA BIN MAWARDI", class: "4 AFT" },
-                { name: "NAZIRAH AFINA ZAHIRA BINTI ABDUL AZIZ", class: "4 AFT" },
-                { name: "NUR AWATIF IRDINA BINTI ABDUL MANAF", class: "4 AFT" },
-                { name: "NUR RANIA ALISHA BINTI ABD RANI", class: "4 AFT" },
-                { name: "NUR SYASYA ARIANA BINTI SHAHRUL RIDHZUAN", class: "4 AFT" },
-                { name: "TUAN IRENE ARDINI BINTI TUAN AFIF", class: "4 AFT" },
-                { name: "AISH QUSYAIRI BIN AZIAN", class: "4 AFQ" },
-                { name: "DHIA NURAISYAH SAFIYYA BINTI MOHD FAIZOL", class: "4 AFQ" },
-                { name: "MUHAMMAD ADAM IQRAM BIN AHMAD AL-HAFIZ", class: "4 AFQ" },
-                { name: "MUHAMMAD IMAAN A'IZUDDIN BIN MOHD NASRULLAH", class: "4 AFQ" },
-                { name: "MUHAMMAD SHAHRUL NIDZMAN BIN BADROL HISHAM", class: "4 AFQ" },
-                { name: "NUR ALESHA QAISARA BINTI MOHD ZULADERA", class: "4 AFQ" },
-                { name: "NUR ARISSA SUMMAYAH BINTI MOHD SAFUWAN FATIHI", class: "4 AFQ" },
-                { name: "NUR DELISHA ADELIA BINTI MOHAMAD EZRI", class: "4 AFQ" },
-                { name: "NUR FASHA HUMAYRAA BINTI MOHD ZAINAL", class: "4 AFQ" },
-                { name: "NUR SYAFIA BINTI AHMAD FAIZA", class: "4 AFQ" },
-                { name: "PUTRI LARA ELYSHA BINTI MOHD SHARIFF", class: "4 AFQ" },
-                { name: "CHE MUHAMMAD IZZAT HARIS BIN CHE SAUFI", class: "4 ANR" },
-                { name: "MAISARAH BINTI FAUZI", class: "4 ANR" },
-                { name: "MOHAMAD ALIF AR'SYAD BIN MOHD AZLAN", class: "4 ANR" },
-                { name: "MUHAMMAD AL AMIN FIKRI BIN MOHD ASKOZI", class: "4 ANR" },
-                { name: "MUHAMMAD AMMAR HARIZ BIN MOHD FAIZ", class: "4 ANR" },
-                { name: "MUHAMMAD FAKRUL RAZI BIN MOHD ABI RAFDI", class: "4 ANR" },
-                { name: "MUHAMMAD NUR FAKRULLAH BIN MOHD RAFFI", class: "4 ANR" },
-                { name: "MUHAMMAD SHAUQI ILLIAS BIN MOHD SALMAN", class: "4 ANR" },
-                { name: "MUHAMMAD YUSOF NAUFAL BIN MOHD ANUAR", class: "4 ANR" },
-                { name: "NOR AUNI ADELIA BINTI AZLI", class: "4 ANR" },
-                { name: "NUR A'ISYAH BINTI MOHAMAD BUDIN", class: "4 ANR" },
-                { name: "NUR AMANI FARHA BINTI MUHAMMAD HASSAN", class: "4 ANR" },
-                { name: "NUR AMEERAH RAYHANAH BINTI AMIR HAMZAH", class: "4 ANR" },
-                { name: "NUR NAJLA HUMAIRA BINTI LAILATU AKMAL", class: "4 ANR" },
-                { name: "NUR SAFIYA ALISYA BINTI BIDIN", class: "4 ANR" },
-                { name: "NUR SYAZA HANNANI BINTI SULAIMAN", class: "4 ANR" },
-                { name: "SYAKIRA BATRISYA BINTI AHMAD NIZAM", class: "4 ANR" },
-                { name: "WAN NUR SYARIFAH NAJIHAH BINTI WAN SHAIRUL SUHAIMIN", class: "4 ANR" },
-
-                // DATA TAHUN 3
-                { name: "AULIA IZZATUNNISA BINTI AHMAD HADYAN", class: "3 AFT" },
-                { name: "CHE WAN NUR HAZWANA BINTI CHE WAN OSMAN", class: "3 AFT" },
-                { name: "MUHAMMAD AMMAR BIN AHMAD FAIZA", class: "3 AFT" },
-                { name: "MUHAMMAD ZIYAD ZAKWAN BIN ZAMRI", class: "3 AFT" },
-                { name: "WAN MUHAMMAD AMMAR BIN WAN MOHD HAIKAL", class: "3 AFT" },
-                { name: "IZZ HADIF BIN AFFANDI", class: "3 AFQ" },
-                { name: "MUHAMMAD 'AKIF KHALISH BIN MUHAMAD ZAHIRUDDIN", class: "3 AFQ" },
-                { name: "MUHAMMAD ABID RAZIN BIN ROSMAN", class: "3 AFQ" },
-                { name: "MUHAMMAD AQASHAF BIN MOHD SAKHA", class: "3 AFQ" },
-                { name: "MUHAMMAD ASFA SYAFIQ BIN SHAMSUL", class: "3 AFQ" },
-                { name: "MUHAMMAD KHALISH ZAFRAN BIN MOHD AMIRUL", class: "3 AFQ" },
-                { name: "NAZHAN HADIF BIN ZAKARIA", class: "3 AFQ" },
-                { name: "NOR FATIHAH BINTI SUKRI", class: "3 AFQ" },
-                { name: "TUAN IRENE AMMARA BINTI TUAN AFIF", class: "3 AFQ" },
-                { name: "AZ ZAHRA ABISHA BINTI AIDIL PUTRA VIJAYARAGAVAN SELVARAJ", class: "3 ANR" },
-                { name: "IFFAT NUR JANNAH BINTI MOKHZANI MIZAN", class: "3 ANR" },
-                { name: "MUHAMMAD RAYHAN AKIF BIN MOHD SAIFULIZAN", class: "3 ANR" },
-                { name: "MOHAMMAD RAYYAN IMAN BIN ABDUL HAFIZ", class: "3 ANR" },
-                { name: "MUHAMMAD ZAYYAN ABQARI BIN MOHAMAD", class: "3 ANR" },
-                { name: "NUR AIRIS SYAKEELA BINTI AHMAD FAIZAL", class: "3 ANR" },
-                { name: "NUR ALEEYA ZAHRA BINTI MOHD SHAHIFULRIZAN", class: "3 ANR" },
-                { name: "NUR JANNATUL SAFIYA BINTI NORFAIZA", class: "3 ANR" },
-                { name: "SITI MARYAM BINTI MOHD SULAIMAN", class: "3 ANR" },
-                { name: "AHMAD ADHAM ARIF BIN AHMAD KHARULDIN", class: "3 ARR" },
-                { name: "AISYAH HUMAIRAH BINTI SAIFULLAH", class: "3 ARR" },
-                { name: "MUHAMAD HARITH HAKIM BIN ISMAIL", class: "3 ARR" },
-                { name: "MUHAMAD IKHWAN ADHA BIN BAHARUDIN", class: "3 ARR" },
-                { name: "MUHAMMAD ADAM RAFFI BIN ZAINURDDIN", class: "3 ARR" },
-                { name: "MUHAMMAD ADIB NAUFAL BIN MOHD DASUKI", class: "3 ARR" },
-                { name: "MUHAMMAD DZAKWAN ANAQI BIN AHMAD", class: "3 ARR" },
-                { name: "MUHAMMAD FARISH IZZUDDIN BIN MOHD ZAINAL", class: "3 ARR" },
-                { name: "MUHAMMAD IRFAN HAQIMI BIN MUHAIDI", class: "3 ARR" },
-                { name: "MUHAMMAD LUTH FIRDAUS BIN ABDULLAH", class: "3 ARR" },
-                { name: "NUR AAIRA ARISSA BINTI AMIRULLAH", class: "3 ARR" },
-                { name: "NUR AIRA ASSYIFA BINTI MUSTAFFA KAMAL", class: "3 ARR" },
-                { name: "RANIATU JANNA BINTI SAKERI", class: "3 ARR" },
-                { name: "ROSE ELENA EMMALIYN BINTI ALANG ISKANDAR", class: "3 ARR" },
-                { name: "WAN NUR AYRA IMANI BINTI WAN MOHD ARIF AFDAH", class: "3 ARR" },
-
-                // DATA TAHUN 2
-                { name: "MUHAMMAD AARIZ ZAKIR BIN FAIZOL", class: "2 AFT" },
-                { name: "MUHAMMAD AQIL BIN MOHD FAIZOL", class: "2 AFQ" },
-                { name: "MUHAMMAD FAKHRUL HAKIMI BIN MUHAMAD FAIZAL", class: "2 AFQ" },
-                { name: "AQEEL ARSYAD BIN ABD RAHMAN", class: "2 ANR" },
-                { name: "CHE WAN NUR NAIRA FATIHAH BINTI CHE WAN SUFLI RATMAN", class: "2 ANR" },
-                { name: "DAMIANA SOFIA BINTI ZAKARIA", class: "2 ANR" },
-                { name: "DHIA KHADEEJA BINTI HANAFFI", class: "2 ANR" },
-                { name: "LUTH QAMAR BIN AHMAD KHAIRUL", class: "2 ANR" },
-                { name: "MUHAMMAD AIDIL SYAWALUDIN BIN CHE", class: "2 ANR" },
-                { name: "MUHAMMAD AIRELL TESA BIN MOHD IZWAN", class: "2 ANR" },
-                { name: "MUHAMMAD AQIL ANAQI BIN ABDUL JABAR", class: "2 ANR" },
-                { name: "MUHAMMAD DANISH HAFIZI BIN MOHD IDZUAN", class: "2 ANR" },
-                { name: "MUHAMMAD FAHIM NASRUDDIN BIN MUHAMAD FAIS", class: "2 ANR" },
-                { name: "MUHAMMAD HAKIM BIN ABDUL HADI", class: "2 ANR" },
-                { name: "MUHAMMAD HARIS BIN HARDY NURHADI @ MUHAMMAD NAQIB", class: "2 ANR" },
-                { name: "NUR AIRIS NAFEESA BINTI MOHD YASSIN", class: "2 ANR" },
-                { name: "NUR FATIHAH NABILA BINTI MUHAMAD FAIS", class: "2 ANR" },
-                { name: "NUR QAISARA IMANI BINTI AMIRYUSOF SHUKRI", class: "2 ANR" },
-                { name: "AHMAD ZUFIQA BIN SUHAMESI @ SUHAMIZI", class: "2 ARR" },
-                { name: "AQEEB RAYYAN BIN NOOR AFSYAM RIZZUAN", class: "2 ARR" },
-                { name: "MUHAMMAD ADWA FAYYAD BIN AFIF FARHAN", class: "2 ARR" },
-                { name: "MUHAMMAD ASHRAF HUZAIRI BIN ABDULLAH", class: "2 ARR" },
-                { name: "MUHAMMAD HAFIZ AR RAYYAN BIN MUHAMMAD HASSAN", class: "2 ARR" },
-                { name: "MUHAMMAD NOR HARRAZ BIN MOHD NOOR", class: "2 ARR" },
-                { name: "MUHAMMAD NUR AIDIL ZIKRY BIN MOHD RAFFI", class: "2 ARR" },
-                { name: "MUHAMMAD WARITH ADAM BIN MOHD HISYAM", class: "2 ARR" },
-                { name: "MUHAMMAD WAZIF ASYRAF BIN MAWARDI", class: "2 ARR" },
-                { name: "NUR AMMARA AYUNI BINTI SUHAIMI", class: "2 ARR" },
-                { name: "NUR ASYA AR'MINA BINTI MOHD AZLAN", class: "2 ARR" },
-                { name: "NUR ATIRA HUMAIRA BINTI MOHD RASHIMAN", class: "2 ARR" },
-                { name: "NUR DINARA YUSRINA BINTI MOHAMAD EZRI", class: "2 ARR" },
-                { name: "NUR MUHAMMAD HANNAN BIN MOHD HELMI", class: "2 ARR" },
-                { name: "ROSE SYAWATUL UQIRA BINTI NOR AZMI", class: "2 ARR" },
-                { name: "SU'MARHAINI PUTRI BINTI ALANG ISKANDAR", class: "2 ARR" }
-            ];
-
-        const MONTHS = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
-
-        // --- STATE APLIKASI ---
-        let state = {
-            user: null,
-            activeView: 'kehadiran',
-            currentYearTab: "TAHUN 2",
-            searchTerm: "",
-            attendanceData: {}, 
-            selectedMonth: new Date().getMonth(),
-            todayStr: new Date().toLocaleDateString('en-CA')
+        const setSync = (status) => {
+            const dot = document.getElementById('sync-dot');
+            const text = document.getElementById('sync-text');
+            if (status === 'syncing') {
+                dot.className = "w-2 h-2 bg-amber-500 animate-pulse rounded-full";
+                text.innerText = "Mengemas kini...";
+            } else if (status === 'ready') {
+                dot.className = "w-2 h-2 bg-emerald-500 rounded-full";
+                text.innerText = "Sedia";
+            } else {
+                dot.className = "w-2 h-2 bg-rose-500 rounded-full";
+                text.innerText = "Ralat";
+            }
         };
 
-        // --- AUTHENTICATION ---
-        const initAuth = async () => {
+        const init = async () => {
+            document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('ms-MY', { 
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
+            }).toUpperCase();
+            document.getElementById('total-students-ui').innerText = STUDENTS.length;
+            
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, (user) => { if (user) { currentUser = user; setupListeners(); } });
+
+            renderTabs();
+            renderStudents();
+            setupSearch();
+        };
+
+        const setupListeners = () => {
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'attendance');
+            onSnapshot(q, (snapshot) => {
+                attendanceData = {};
+                snapshot.forEach(doc => { attendanceData[doc.id] = doc.data(); });
+                updateStats();
+                refreshUI();
+            }, (err) => console.error("Snapshot error:", err));
+        };
+
+        // Two-way toggle (Tick and Untick)
+        window.toggleAttendance = async (studentId) => {
+            if (!currentUser) return;
+            setSync('syncing');
+            const currentDay = attendanceData[dateKey] || {};
+            const currentState = !!currentDay[studentId]; // Get existing state
+            const newState = !currentState; // Toggle
+            
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Auth Fail:", err);
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'attendance', dateKey);
+                await setDoc(docRef, { ...currentDay, [studentId]: newState }, { merge: true });
+                setSync('ready');
+            } catch (e) {
+                setSync('error');
             }
         };
 
-        onAuthStateChanged(auth, (user) => {
-            state.user = user;
-            if (user) {
-                document.getElementById('sync-dot').classList.replace('bg-rose-500', 'bg-emerald-500');
-                document.getElementById('sync-text').innerText = `Berhubung (UID: ${user.uid.substring(0,5)})`;
-                startSync();
+        window.toggleBulkModal = (show) => {
+            const modal = document.getElementById('bulk-modal');
+            const contextText = document.getElementById('bulk-context-text');
+            if (show) {
+                const search = document.getElementById('search-input').value;
+                let context = currentYearFilter === 'ALL' ? 'Semua Murid' : `Tahun ${currentYearFilter}`;
+                if (search) context += ` (carian: "${search}")`;
+                contextText.innerText = context;
+                modal.classList.replace('hidden', 'flex');
+            } else {
+                modal.classList.replace('flex', 'hidden');
             }
-        });
+        };
 
-        // --- SYNC DATA ---
-        const startSync = () => {
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'pss_susu');
-            onSnapshot(query(colRef), (snapshot) => {
-                const data = {};
-                snapshot.forEach(doc => {
-                    data[doc.id] = doc.data().students || {};
-                });
-                state.attendanceData = data;
-                render();
-            }, (error) => {
-                console.error("Sync Error:", error);
+        window.markAllPresent = async () => {
+            if (!currentUser) return;
+            toggleBulkModal(false);
+            setSync('syncing');
+
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const currentDay = { ...(attendanceData[dateKey] || {}) };
+
+            const filteredIds = STUDENTS.filter(s => {
+                const matchesSearch = s.name.toLowerCase().includes(search);
+                const matchesTab = currentYearFilter === 'ALL' || s.class.startsWith(currentYearFilter);
+                return matchesSearch && matchesTab;
+            }).map(s => s.id);
+
+            filteredIds.forEach(id => { currentDay[id] = true; });
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'attendance', dateKey);
+                await setDoc(docRef, currentDay);
+                setSync('ready');
+            } catch (e) { setSync('error'); }
+        };
+
+        const updateStats = () => {
+            const today = attendanceData[dateKey] || {};
+            const count = Object.values(today).filter(v => v === true).length;
+            document.getElementById('today-count-ui').innerText = count;
+        };
+
+        const refreshUI = () => {
+            if (currentView === 'kehadiran') renderStudents();
+            if (currentView === 'rekod') renderRekod();
+            if (currentView === 'rumusan') renderRumusan();
+        };
+
+        const renderTabs = () => {
+            const container = document.getElementById('year-tabs');
+            const classes = ['ALL', 'PPKI', '1', '2', '3', '4', '5', '6'];
+            container.innerHTML = classes.map(cls => `
+                <button onclick="setFilter('${cls}')" class="px-6 py-2 rounded-full font-black text-[10px] whitespace-nowrap transition-all border ${currentYearFilter === cls ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200'}">
+                    ${cls === 'ALL' ? 'SEMUA' : 'TAHUN ' + cls}
+                </button>
+            `).join('');
+        };
+
+        window.setFilter = (cls) => {
+            currentYearFilter = cls;
+            renderTabs();
+            renderStudents();
+        };
+
+        const renderStudents = () => {
+            const container = document.getElementById('student-grid');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const today = attendanceData[dateKey] || {};
+
+            const filtered = STUDENTS.filter(s => {
+                const matchesSearch = s.name.toLowerCase().includes(search);
+                const matchesTab = currentYearFilter === 'ALL' || s.class.startsWith(currentYearFilter);
+                return matchesSearch && matchesTab;
             });
+
+            container.innerHTML = filtered.map(s => {
+                const isSelected = !!today[s.id];
+                return `
+                    <div onclick="toggleAttendance('${s.id}')" class="student-card p-4 rounded-2xl border-2 flex items-center justify-between bg-white ${isSelected ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100'}">
+                        <div class="flex-1 min-w-0 pr-3">
+                            <div class="text-[10px] font-black text-blue-600 uppercase mb-1">${s.class}</div>
+                            <div class="text-xs font-bold text-slate-900 truncate">${s.name}</div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-200 text-transparent'}">
+                            <i class="fas fa-check text-[10px]"></i>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         };
 
-        // --- ACTIONS ---
-        window.toggleAttendance = async (name) => {
-            if (!state.user) return;
-            const currentStatus = !!(state.attendanceData[state.todayStr]?.[name]);
-            const updates = { ...(state.attendanceData[state.todayStr] || {}) };
-            updates[name] = !currentStatus;
-
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'pss_susu', state.todayStr);
-            await setDoc(docRef, { students: updates }, { merge: true });
+        const renderRekod = () => {
+            const body = document.getElementById('rekod-table-body');
+            const today = attendanceData[dateKey] || {};
+            const list = STUDENTS.map(s => ({ ...s, hadir: !!today[s.id] })).filter(s => s.hadir).sort((a,b) => a.class.localeCompare(b.class) || a.name.localeCompare(b.name));
+            body.innerHTML = list.length ? list.map(s => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 text-xs font-bold text-slate-700 uppercase">${s.name}</td>
+                    <td class="px-6 py-4 text-[10px] font-black text-blue-600">${s.class}</td>
+                    <td class="px-6 py-4 text-center"><span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[9px] font-black uppercase">TERIMA</span></td>
+                </tr>
+            `).join('') : `<tr><td colspan="3" class="p-10 text-center text-slate-400 font-bold text-xs uppercase">Tiada rekod untuk hari ini</td></tr>`;
         };
 
-        window.markClassAll = async (className) => {
-            if (!state.user) return;
-            const students = MASTER_DATA[state.currentYearTab].filter(s => s.k === className);
-            const updates = { ...(state.attendanceData[state.todayStr] || {}) };
-            students.forEach(s => { updates[s.n] = true; });
-
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'pss_susu', state.todayStr);
-            await setDoc(docRef, { students: updates }, { merge: true });
+        const renderRumusan = () => {
+            const body = document.getElementById('rumusan-table-body');
+            const month = document.getElementById('month-selector').value;
+            const analysis = STUDENTS.map(s => {
+                let count = 0;
+                Object.keys(attendanceData).forEach(date => { if (date.startsWith(`${new Date().getFullYear()}-${month}`) && attendanceData[date][s.id]) count++; });
+                return { ...s, count };
+            }).sort((a,b) => b.count - a.count || a.name.localeCompare(b.name));
+            body.innerHTML = analysis.map(s => `
+                <tr class="${s.count > 0 ? 'bg-white' : 'bg-slate-50/50'}">
+                    <td class="px-6 py-4 text-xs font-bold text-slate-700 uppercase">${s.name}</td>
+                    <td class="px-6 py-4 text-[10px] font-black text-slate-400">${s.class}</td>
+                    <td class="px-6 py-4 text-center"><span class="inline-block w-8 h-8 leading-8 rounded-lg ${s.count > 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'} font-black text-xs">${s.count}</span></td>
+                </tr>
+            `).join('');
         };
 
         window.switchView = (view) => {
-            state.activeView = view;
-            render();
-        };
-
-        window.setYearTab = (year) => {
-            state.currentYearTab = year;
-            render();
-        };
-
-        window.handleSearch = () => {
-            state.searchTerm = document.getElementById('search-input').value.toUpperCase();
-            render();
-        };
-
-        window.updateLaporan = () => {
-            state.selectedMonth = parseInt(document.getElementById('month-selector').value);
-            render();
-        };
-
-        // --- EXCEL LOGIC ---
-        window.downloadExcel = () => {
-            const monthName = MONTHS[state.selectedMonth];
-            const dataToExport = [];
-            const allStudents = Object.values(MASTER_DATA).flat();
-            
-            // Generate monthly stats
-            const stats = {};
-            Object.keys(state.attendanceData).forEach(date => {
-                const d = new Date(date);
-                if (d.getMonth() === state.selectedMonth) {
-                    const dayData = state.attendanceData[date];
-                    Object.entries(dayData).forEach(([name, status]) => {
-                        if (status) stats[name] = (stats[name] || 0) + 1;
-                    });
-                }
+            currentView = view;
+            ['kehadiran', 'rekod', 'rumusan'].forEach(v => {
+                const element = document.getElementById(`view-${v}`);
+                if (element) element.classList.toggle('hidden', v !== view);
+                const btn = document.getElementById(`nav-${v}`);
+                if (btn) btn.className = (v === view) ? "nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-blue-600 text-white shadow-lg" : "nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-white text-blue-900 border border-slate-200";
             });
+            refreshUI();
+        };
 
-            // Format data for sheet
-            allStudents.forEach(s => {
-                dataToExport.push({
-                    "NAMA MURID": s.n,
-                    "KELAS": s.k,
-                    "KEKERAPAN TERIMA": stats[s.n] || 0
-                });
+        const setupSearch = () => {
+            document.getElementById('search-input').addEventListener('input', renderStudents);
+            document.getElementById('month-selector').addEventListener('change', renderRumusan);
+            document.getElementById('download-btn').addEventListener('click', downloadExcel);
+        };
+
+        const downloadExcel = () => {
+            const monthNames = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
+            const monthIdx = document.getElementById('month-selector').value;
+            const monthName = monthNames[parseInt(monthIdx)-1];
+            const data = STUDENTS.map(s => {
+                let count = 0;
+                Object.keys(attendanceData).forEach(date => { if (date.startsWith(`${new Date().getFullYear()}-${monthIdx}`) && attendanceData[date][s.id]) count++; });
+                return { 'NAMA MURID': s.name, 'KELAS': s.class, 'KEKERAPAN TERIMA': count };
             });
-
-            // Create workbook
+            const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet(dataToExport);
-
-            // Auto-width columns
-            const colWidths = [{ wch: 45 }, { wch: 20 }, { wch: 20 }];
-            ws['!cols'] = colWidths;
-
-            XLSX.utils.book_append_sheet(wb, ws, "Laporan_PSS");
-            XLSX.writeFile(wb, `LAPORAN_PSS_SKIOR_${monthName.toUpperCase()}_2026.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+            XLSX.writeFile(wb, `PSS_SKIOR_SUSU_${monthName.toUpperCase()}.xlsx`);
         };
 
-        // --- RENDER ENGINE ---
-        const render = () => {
-            document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('ms-MY', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
-            document.getElementById('rekod-date').innerText = state.todayStr;
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = btn.id === `nav-${state.activeView}` 
-                    ? "nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-blue-600 text-white shadow-lg"
-                    : "nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-white text-blue-900 border border-slate-200";
-            });
-
-            document.getElementById('view-kehadiran').classList.toggle('hidden', state.activeView !== 'kehadiran');
-            document.getElementById('view-rekod').classList.toggle('hidden', state.activeView !== 'rekod');
-            document.getElementById('view-rumusan').classList.toggle('hidden', state.activeView !== 'rumusan');
-
-            if (state.activeView === 'kehadiran') {
-                const tabsContainer = document.getElementById('year-tabs');
-                tabsContainer.innerHTML = Object.keys(MASTER_DATA).map(year => `
-                    <button onclick="setYearTab('${year}')" class="px-6 py-3 rounded-2xl font-black text-[11px] whitespace-nowrap transition-all ${state.currentYearTab === year ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200'}">
-                        ${year}
-                    </button>
-                `).join('');
-
-                const students = MASTER_DATA[state.currentYearTab] || [];
-                const groups = {};
-                students.forEach(s => {
-                    if (state.searchTerm && !s.n.includes(state.searchTerm)) return;
-                    if (!groups[s.k]) groups[s.k] = [];
-                    groups[s.k].push(s);
-                });
-
-                document.getElementById('student-groups-container').innerHTML = Object.entries(groups).map(([className, students]) => `
-                    <div class="bg-white rounded-[2rem] p-6 shadow-sm border-l-[10px] border-blue-600">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-xl font-black text-blue-900">${className}</h3>
-                            <button onclick="markClassAll('${className}')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black transition-all flex items-center gap-2">
-                                <i class="fas fa-check-circle"></i> SEMUA TERIMA
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                            ${students.map(s => {
-                                const isHadir = !!(state.attendanceData[state.todayStr]?.[s.n]);
-                                return `
-                                    <button onclick="toggleAttendance('${s.n}')" class="p-4 rounded-xl border-2 text-left transition-all ${isHadir ? 'bg-blue-600 border-amber-400 text-white shadow-md' : 'bg-white border-slate-100 text-slate-700'}">
-                                        <span class="text-[11px] font-bold block leading-tight">${s.n}</span>
-                                    </button>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            if (state.activeView === 'rekod') {
-                const tbody = document.getElementById('rekod-table-body');
-                const allStudents = Object.values(MASTER_DATA).flat();
-                tbody.innerHTML = allStudents.map(s => {
-                    const status = state.attendanceData[state.todayStr]?.[s.n];
-                    if (!status && state.searchTerm === "") return "";
-                    return `
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-6 py-4 font-bold text-xs uppercase">${s.n}</td>
-                            <td class="px-6 py-4 text-[11px] text-slate-500 font-bold">${s.k}</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-3 py-1 rounded-full text-[9px] font-black ${status ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
-                                    ${status ? '🥛 TERIMA' : '❌ TIADA'}
-                                </span>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-
-            if (state.activeView === 'rumusan') {
-                const selector = document.getElementById('month-selector');
-                if (selector.innerHTML === "") {
-                    selector.innerHTML = MONTHS.map((m, i) => `<option value="${i}" ${i === state.selectedMonth ? 'selected' : ''}>${m.toUpperCase()}</option>`).join('');
-                }
-
-                const stats = {};
-                Object.keys(state.attendanceData).forEach(date => {
-                    const d = new Date(date);
-                    if (d.getMonth() === state.selectedMonth) {
-                        const dayData = state.attendanceData[date];
-                        Object.entries(dayData).forEach(([name, status]) => {
-                            if (status) stats[name] = (stats[name] || 0) + 1;
-                        });
-                    }
-                });
-
-                const allStudents = Object.values(MASTER_DATA).flat();
-                document.getElementById('rumusan-table-body').innerHTML = allStudents.map(s => {
-                    const count = stats[s.n] || 0;
-                    return `
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-6 py-4 font-bold text-xs uppercase">${s.n}</td>
-                            <td class="px-6 py-4 text-[11px] text-slate-500 font-bold">${s.k}</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="bg-blue-100 text-blue-600 px-4 py-1 rounded-lg text-xs font-black">${count} KALI</span>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-
-            const todayCount = Object.values(state.attendanceData[state.todayStr] || {}).filter(v => v === true).length;
-            document.getElementById('today-count').innerText = todayCount;
-        };
-
-        initAuth();
-        render();
-
+        init();
     </script>
 </body>
-
 </html>
