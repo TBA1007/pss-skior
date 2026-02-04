@@ -18,12 +18,12 @@
             cursor: pointer;
             filter: invert(1);
         }
+        .year-tab.active { background-color: #1e293b; color: white; border: none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-24">
 
     <div id="app">
-        <!-- Header Section -->
         <header class="bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 text-white p-6 shadow-xl sticky top-0 z-50 border-b-4 border-amber-400">
             <div class="max-w-6xl mx-auto flex flex-col items-center text-center">
                 <div class="flex items-center gap-3 mb-4">
@@ -42,7 +42,6 @@
                     </div>
                 </div>
 
-                <!-- Date Selector for Backdating -->
                 <div class="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-2xl border border-white/20">
                     <i class="far fa-calendar-alt text-amber-400"></i>
                     <input type="date" id="attendance-date-picker" class="bg-transparent text-white font-bold text-xs uppercase outline-none cursor-pointer">
@@ -50,21 +49,19 @@
             </div>
         </header>
 
-        <!-- Navigation Bar -->
         <nav class="max-w-4xl mx-auto flex justify-center gap-2 p-4 mt-4 sticky top-[210px] z-40 bg-slate-50/90 backdrop-blur-md">
-            <button onclick="switchView('kehadiran')" id="nav-kehadiran" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-blue-600 text-white shadow-lg">
+            <button onclick="window.switchView('kehadiran')" id="nav-kehadiran" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-blue-600 text-white shadow-lg">
                 <i class="fas fa-check-square"></i> PENANDAAN
             </button>
-            <button onclick="switchView('rekod')" id="nav-rekod" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-white text-blue-900 border border-slate-200">
+            <button onclick="window.switchView('rekod')" id="nav-rekod" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-white text-blue-900 border border-slate-200">
                 <i class="fas fa-list-ul"></i> REKOD
             </button>
-            <button onclick="switchView('rumusan')" id="nav-rumusan" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-white text-blue-900 border border-slate-200">
+            <button onclick="window.switchView('rumusan')" id="nav-rumusan" class="nav-btn flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs transition-all bg-white text-blue-900 border border-slate-200">
                 <i class="fas fa-file-invoice"></i> LAPORAN
             </button>
         </nav>
 
         <main class="max-w-6xl mx-auto px-4 mt-6">
-            <!-- Penandaan View -->
             <div id="view-kehadiran" class="space-y-6">
                 <div class="flex flex-col gap-3">
                     <div class="relative w-full">
@@ -73,48 +70,47 @@
                     </div>
                     
                     <div class="flex gap-2">
-                        <button onclick="bulkToggle()" id="bulk-toggle-btn" class="flex-1 bg-slate-800 text-white px-4 py-5 rounded-3xl font-black text-xs flex items-center justify-center gap-2 hover:bg-slate-700 transition-all shadow-md">
-                            <i class="fas fa-tasks"></i>
-                            <span id="bulk-toggle-text">HADIR SEMUA</span>
-                        </button>
-                        
-                        <button onclick="resetDailyCount()" class="bg-rose-100 text-rose-600 px-6 py-5 rounded-3xl font-black text-xs flex items-center justify-center gap-2 hover:bg-rose-200 transition-all shadow-md border border-rose-200">
+                        <button onclick="window.resetDailyCount()" class="w-full bg-rose-100 text-rose-600 px-6 py-5 rounded-3xl font-black text-xs flex items-center justify-center gap-2 hover:bg-rose-200 transition-all shadow-md border border-rose-200">
                             <i class="fas fa-trash-alt"></i>
-                            <span>PADAM REKOD</span>
+                            <span>PADAM REKOD HARI INI</span>
                         </button>
                     </div>
                 </div>
 
-                <div id="year-tabs" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar"></div>
-                <div id="student-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                <div id="year-tabs" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                    </div>
+
+                <div id="student-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    </div>
             </div>
 
-            <!-- Record View -->
             <div id="view-rekod" class="hidden">
                 <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-slate-100">
                     <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                        <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Rekod bagi <span id="rekod-date-label"></span></h3>
+                        <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Senarai Hadir: <span id="rekod-date-label"></span></h3>
                     </div>
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-tighter bg-slate-50/50">
-                                <th class="px-6 py-4">Nama Murid</th>
-                                <th class="px-6 py-4">Kelas</th>
-                                <th class="px-6 py-4 text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rekod-table-body" class="divide-y divide-slate-100"></tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-[10px] font-black text-slate-400 uppercase tracking-tighter bg-slate-50/50">
+                                    <th class="px-6 py-4">Nama Murid</th>
+                                    <th class="px-6 py-4">Kelas</th>
+                                    <th class="px-6 py-4 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rekod-table-body" class="divide-y divide-slate-100">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- Report View -->
             <div id="view-rumusan" class="hidden space-y-6">
                 <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
                     <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                         <div class="text-center md:text-left">
                             <h2 class="text-2xl font-black text-blue-900">Laporan Bulanan</h2>
-                            <p class="text-slate-500 text-xs uppercase font-bold tracking-widest mt-1">Muat turun data mengikut bulan</p>
+                            <p class="text-slate-500 text-xs uppercase font-bold tracking-widest mt-1">Muat turun data kehadiran</p>
                         </div>
                         <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                             <select id="report-month" class="w-full sm:w-auto bg-slate-50 border-2 border-slate-100 px-4 py-3 rounded-2xl font-bold text-sm outline-none focus:border-blue-500">
@@ -123,58 +119,26 @@
                                 <option value="07">Julai</option><option value="08">Ogos</option><option value="09">September</option>
                                 <option value="10">Oktober</option><option value="11">November</option><option value="12">Disember</option>
                             </select>
-                            <select id="report-year" class="w-full sm:w-auto bg-slate-50 border-2 border-slate-100 px-4 py-3 rounded-2xl font-bold text-sm outline-none focus:border-blue-500"></select>
-                            <button onclick="exportMonthlyReport()" class="w-full sm:w-auto bg-emerald-600 text-white px-8 py-3 rounded-2xl text-xs font-black flex items-center justify-center gap-2 shadow-lg hover:bg-emerald-700 transition-all">
+                            <button onclick="window.exportReport()" class="w-full sm:w-auto bg-emerald-600 text-white px-8 py-3 rounded-2xl text-xs font-black flex items-center justify-center gap-2 shadow-lg hover:bg-emerald-700 transition-all">
                                 <i class="fas fa-download"></i> EXCEL
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-slate-100">
-                    <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-                        <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Prestasi Bulanan</h3>
-                    </div>
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="text-[10px] font-black text-slate-400 uppercase bg-white">
-                                <th class="px-6 py-4">Nama Murid</th>
-                                <th class="px-6 py-4">Kelas</th>
-                                <th class="px-6 py-4 text-center">Jumlah Kehadiran</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rumusan-table-body" class="divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
             </div>
         </main>
 
         <div id="status-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-2 rounded-full text-[10px] font-bold shadow-2xl flex items-center gap-3 z-[100]">
-            <span id="sync-dot" class="w-2 h-2 bg-emerald-500 rounded-full"></span>
-            <span id="sync-text">Sistem Sedia</span>
-        </div>
-    </div>
-
-    <!-- Confirm Modal -->
-    <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-[2.5rem] p-8 max-w-sm w-full text-center shadow-2xl scale-95 transition-transform">
-            <div class="w-20 h-20 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h2 class="text-xl font-black text-slate-900 mb-2">Padam Rekod?</h2>
-            <p class="text-slate-500 text-sm mb-8">Tindakan ini akan memadam data bagi tarikh yang dipilih. Teruskan?</p>
-            <div class="flex flex-col gap-2">
-                <button id="modal-confirm-btn" class="w-full bg-rose-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Ya, Padam</button>
-                <button id="modal-cancel-btn" class="w-full bg-slate-100 text-slate-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Batal</button>
-            </div>
+            <span id="sync-dot" class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+            <span id="sync-text">Sistem Bersedia</span>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBqP2wFKLKUycJg4w8fS5bjxFMlwR8HfRk",
             authDomain: "rmt-digital.firebaseapp.com",
@@ -185,10 +149,9 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = "pss-skior-digital-new";
 
+        // --- STUDENT DATA (CORRECTED) ---
         const rawStudents = [
             // DATA PPKI
             { name: "KHADEEJA AFEEYA BINTI ISMAIL", class: "PPKI" },
@@ -235,7 +198,7 @@
             { name: "AR-ZARRA AISYA' ALZOHARI", class: "PPKI" },
             { name: "SITI AISYAH BATRISYA BT MOHAMAD HAFIZ", class: "PPKI" },
 
-            // DATA TAHUN 6
+            // DATA TAHUN 6 (Corrected Qaisarah to 6 AFT)
             { name: "NUR ARFA NADRAH BINTI MOHD DASUKI", class: "6 AFT" },
             { name: "WAN NUR IRDINA ZULAIKHA BINTI MOHD HAIKAL", class: "6 AFT" },
             { name: "AR RAYYAN FAWWAZ BIN AIDIL PUTRA", class: "6 AFQ" },
@@ -262,7 +225,7 @@
             { name: "MUHAMMAD ARASH MURSYI BIN MOHD YASSIN", class: "6 ARR" },
             { name: "MUHAMMAD ARASH MUZKYI BIN MOHD YASSIN", class: "6 ARR" },
             { name: "MUHAMMAD NAZHAN DANISH BIN MOHD NIZRUL IDLAN", class: "6 ARR" },
-            { name: "MUHAMMAD NUR NAZMIRULLAH BIN HARDY RAFFI", class: "6 ARR" },
+            { name: "MUHAMMAD NUR NAZMIRULLAH BIN MOHD RAFFI", class: "6 ARR" },
             { name: "MUHAMMAD QAADIRAN NASRULLAH BIN KAMARULZAMAN", class: "6 ARR" },
             { name: "NUR AIERIS ILYANA BINTI NORAZMAN", class: "6 ARR" },
             { name: "NUR AIMY SAFIYYA BINTI AHMAD FAIZAL", class: "6 ARR" },
@@ -284,7 +247,7 @@
             { name: "NUR FATHIAH BINTI MUHAMAD FAIZAL", class: "5 AFQ" },
             { name: "NUR SYAZA HUMAIRA BINTI SULAIMAN", class: "5 AFQ" },
             { name: "PUTERI NURAISYA RANIA BINTI MOHD AZELAN", class: "5 AFQ" },
-            { name: "SITI NURNADHIRA BINTI HARDY NURHADI @ MUHAMMAD NAQIB", class: "5 AFQ" },
+            { name: "SITI NURNADHIRA BINTI MOHD NURHADI @ MUHAMMAD NAQIB", class: "5 AFQ" },
             { name: "AHMAD ZACKHERY BIN MOKHZANI MIZAN", class: "5 ANR" },
             { name: "MUHAMAD AQIL LUTHFY BIN MUHAMAD HAFIZ", class: "5 ANR" },
             { name: "MUHAMMAD AQMAR AIMAN BIN MOHD.RADUAN", class: "5 ANR" },
@@ -340,7 +303,7 @@
             { name: "MUHAMMAD AL AMIN FIKRI BIN MOHD ASKOZI", class: "4 ANR" },
             { name: "MUHAMMAD AMMAR HARIZ BIN MOHD FAIZ", class: "4 ANR" },
             { name: "MUHAMMAD FAKRUL RAZI BIN MOHD ABI RAFDI", class: "4 ANR" },
-            { name: "MUHAMMAD NUR FAKRULLAH BIN HARDY RAFFI", class: "4 ANR" },
+            { name: "MUHAMMAD NUR FAKRULLAH BIN MOHD RAFFI", class: "4 ANR" },
             { name: "MUHAMMAD SHAUQI ILLIAS BIN MOHD SALMAN", class: "4 ANR" },
             { name: "MUHAMMAD YUSOF NAUFAL BIN MOHD ANUAR", class: "4 ANR" },
             { name: "NOR AUNI ADELIA BINTI AZLI", class: "4 ANR" },
@@ -393,7 +356,7 @@
             { name: "ROSE ELENA EMMALIYN BINTI ALANG ISKANDAR", class: "3 ARR" },
             { name: "WAN NUR AYRA IMANI BINTI WAN MOHD ARIF AFDAH", class: "3 ARR" },
 
-            // DATA TAHUN 2
+            // DATA TAHUN 2 (Corrected Su'marhaini to 2 ARR)
             { name: "MUHAMMAD AARIZ ZAKIR BIN FAIZOL", class: "2 AFT" },
             { name: "MUHAMMAD AQIL BIN MOHD FAIZOL", class: "2 AFQ" },
             { name: "MUHAMMAD FAKHRUL HAKIMI BIN MUHAMAD FAIZAL", class: "2 AFQ" },
@@ -418,7 +381,7 @@
             { name: "MUHAMMAD ASHRAF HUZAIRI BIN ABDULLAH", class: "2 ARR" },
             { name: "MUHAMMAD HAFIZ AR RAYYAN BIN MUHAMMAD HASSAN", class: "2 ARR" },
             { name: "MUHAMMAD NOR HARRAZ BIN MOHD NOOR", class: "2 ARR" },
-            { name: "MUHAMMAD NUR AIDIL ZIKRY BIN HARDY RAFFI", class: "2 ARR" },
+            { name: "MUHAMMAD NUR AIDIL ZIKRY BIN MOHD RAFFI", class: "2 ARR" },
             { name: "MUHAMMAD WARITH ADAM BIN MOHD HISYAM", class: "2 ARR" },
             { name: "MUHAMMAD WAZIF ASYRAF BIN MAWARDI", class: "2 ARR" },
             { name: "NUR AMMARA AYUNI BINTI SUHAIMI", class: "2 ARR" },
@@ -427,8 +390,8 @@
             { name: "NUR DINARA YUSRINA BINTI MOHAMAD EZRI", class: "2 ARR" },
             { name: "NUR MUHAMMAD HANNAN BIN MOHD HELMI", class: "2 ARR" },
             { name: "ROSE SYAWATUL UQIRA BINTI NOR AZMI", class: "2 ARR" },
-            { name: "SU'MARHAINI PUTRI BINTI ALANG ISKANDAR", class: "2 ARR" }
-           
+            { name: "SU'MARHAINI PUTRI BINTI ALANG ISKANDAR", class: "2 ARR" },
+
             // DATA TAHUN 1
             { name: "AHMAD AIDAN HADZIM BIN TERMIZI", class: "1 AFT" },
             { name: "CHE MUHAMMAD AQIL RIEZQI BIN MOHD SHAFIE", class: "1 AFT" },
@@ -458,251 +421,168 @@
             { name: "NUR UMNIYA WAFIRAH BINTI HASMADI", class: "1 ARR" },
             { name: "PUTRI NOR NAURA RANIA BINTI MOHD RAFFI", class: "1 ARR" },
             { name: "YASNA EILIYA ZASKIYA BINTI MOHAMAD SYARIFUDIN", class: "1 ARR" },
-            { name: "MUHAMMAD WARITH HAFIZ BIN MOHD HISYAM", class: "1 ARR" },
-            ];
+            { name: "MUHAMMAD WARITH HAFIZ BIN MOHD HISYAM", class: "1 ARR" }
+        ];
 
-        // Unique ID for each student
-        const STUDENTS = rawStudents.map((s, idx) => ({
-            ...s, id: `stu_${idx.toString().padStart(3, '0')}`
+        // Process Students
+        const students = rawStudents.map(s => ({
+            ...s,
+            id: s.name.trim().replace(/\s+/g, '_').toLowerCase(),
+            year: s.class.includes('PPKI') ? 'PPKI' : s.class.charAt(0)
         }));
 
-        const classesList = ['PPKI', '1 AFQ', '1 AFT', '1 ANR', '1 ARR', '2 AFQ', '2 AFT', '2 ANR', '2 ARR', '3 AFQ', '3 AFT', '3 ANR', '3 ARR', '4 AFQ', '4 AFT', '4 ANR', '4 ARR', '5 AFQ', '5 AFT', '5 ANR', '5 ARR', '6 AFQ', '6 AFT', '6 ANR', '6 ARR'];
+        // State
+        let currentDate = new Date().toISOString().split('T')[0];
+        let attendanceData = [];
+        let currentFilter = '1'; // Default Year 1
 
-        let attendanceData = {};
-        let currentView = 'kehadiran';
-        let currentClassFilter = 'ALL';
-        
-        // Date handling
-        const getLocalDateString = (dateObj) => dateObj.toISOString().split('T')[0];
-        let activeDateKey = getLocalDateString(new Date());
+        // DOM Elements
+        const datePicker = document.getElementById('attendance-date-picker');
+        const searchInput = document.getElementById('search-input');
+        const gridContainer = document.getElementById('student-grid');
+        const yearTabsContainer = document.getElementById('year-tabs');
+        const todayCountEl = document.getElementById('today-count-ui');
+        const totalStudentsEl = document.getElementById('total-students-ui');
+        const rekodTableBody = document.getElementById('rekod-table-body');
+        const rekodDateLabel = document.getElementById('rekod-date-label');
 
-        const refreshUI = () => {
-            const filteredTotal = (currentClassFilter === 'ALL') 
-                ? STUDENTS.length 
-                : STUDENTS.filter(s => s.class === currentClassFilter).length;
-                
-            document.getElementById('total-students-ui').innerText = filteredTotal;
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            datePicker.value = currentDate;
+            totalStudentsEl.innerText = students.length;
             
-            const dayData = attendanceData[activeDateKey] || {};
-            const count = STUDENTS.filter(s => {
-                const matchesFilter = (currentClassFilter === 'ALL' || s.class === currentClassFilter);
-                return matchesFilter && dayData[s.id] === true;
-            }).length;
-            
-            document.getElementById('today-count-ui').innerText = count;
+            setupTabs();
+            setupListeners();
+            loadAttendance(currentDate);
+        });
 
-            if (currentView === 'kehadiran') renderStudents();
-            if (currentView === 'rekod') renderRekod();
-            if (currentView === 'rumusan') renderRumusan();
-        };
-
-        const renderStudents = () => {
-            const grid = document.getElementById('student-grid');
-            const dayData = attendanceData[activeDateKey] || {};
-            
-            const search = document.getElementById('search-input').value.toLowerCase();
-            const filtered = STUDENTS.filter(s => {
-                const matchesSearch = s.name.toLowerCase().includes(search);
-                const matchesTab = currentClassFilter === 'ALL' || s.class === currentClassFilter;
-                return matchesSearch && matchesTab;
-            });
-
-            grid.innerHTML = filtered.map(s => `
-                <div onclick="toggleAttendance('${s.id}')" class="student-card bg-white p-4 rounded-3xl border-2 ${!!dayData[s.id] ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-slate-100'} flex items-center justify-between">
-                    <div class="flex-1 pr-4">
-                        <span class="block text-[10px] font-black text-blue-900/40 uppercase">${s.class}</span>
-                        <h3 class="text-[11px] font-bold text-slate-800 uppercase line-clamp-2">${s.name}</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center ${!!dayData[s.id] ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 text-slate-300'}">
-                        <i class="fas ${!!dayData[s.id] ? 'fa-check' : 'fa-plus'}"></i>
-                    </div>
-                </div>
-            `).join('');
-            
-            updateBulkToggleBtn(filtered);
-        };
-
-        window.toggleAttendance = async (id) => {
-            const currentDay = attendanceData[activeDateKey] || {};
-            const newState = !currentDay[id];
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', activeDateKey), 
-                { ...currentDay, [id]: newState }, { merge: true });
-        };
-
-        window.bulkToggle = async () => {
-            const search = document.getElementById('search-input').value.toLowerCase();
-            const filtered = STUDENTS.filter(s => {
-                const matchesSearch = s.name.toLowerCase().includes(search);
-                const matchesTab = currentClassFilter === 'ALL' || s.class === currentClassFilter;
-                return matchesSearch && matchesTab;
-            });
-            
-            const today = attendanceData[activeDateKey] || {};
-            const allTicked = filtered.every(s => !!today[s.id]);
-            const updates = { ...today };
-            filtered.forEach(s => updates[s.id] = !allTicked);
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', activeDateKey), updates);
-        };
-
-        window.resetDailyCount = () => {
-            const modal = document.getElementById('confirm-modal');
-            modal.classList.replace('hidden', 'flex');
-            document.getElementById('modal-confirm-btn').onclick = async () => {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', activeDateKey));
-                modal.classList.replace('flex', 'hidden');
-            };
-            document.getElementById('modal-cancel-btn').onclick = () => modal.classList.replace('flex', 'hidden');
-        };
-
-        const renderRekod = () => {
-            const dayData = attendanceData[activeDateKey] || {};
-            document.getElementById('rekod-date-label').innerText = activeDateKey;
-            
-            const filtered = STUDENTS.filter(s => currentClassFilter === 'ALL' || s.class === currentClassFilter);
-
-            document.getElementById('rekod-table-body').innerHTML = filtered.map(s => `
-                <tr>
-                    <td class="px-6 py-4 text-[11px] font-bold uppercase">${s.name}</td>
-                    <td class="px-6 py-4 text-[10px] font-black text-slate-400">${s.class}</td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase ${dayData[s.id] ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                            ${dayData[s.id] ? 'HADIR' : '-'}
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
-        };
-
-        const renderRumusan = () => {
-            const month = document.getElementById('report-month').value;
-            const year = document.getElementById('report-year').value;
-            const prefix = `${year}-${month}`;
-            const counts = {};
-
-            Object.entries(attendanceData).forEach(([date, day]) => {
-                if (date.startsWith(prefix)) {
-                    Object.entries(day).forEach(([id, status]) => {
-                        if (status) counts[id] = (counts[id] || 0) + 1;
-                    });
-                }
-            });
-
-            const filtered = STUDENTS.filter(s => currentClassFilter === 'ALL' || s.class === currentClassFilter);
-
-            document.getElementById('rumusan-table-body').innerHTML = filtered.map(s => `
-                <tr>
-                    <td class="px-6 py-4 text-[11px] font-bold uppercase">${s.name}</td>
-                    <td class="px-6 py-4 text-[10px] font-black text-slate-400">${s.class}</td>
-                    <td class="px-6 py-4 text-center font-black text-blue-600">${counts[s.id] || 0}</td>
-                </tr>
-            `).join('');
-        };
-
-        window.exportMonthlyReport = () => {
-            const month = document.getElementById('report-month').value;
-            const year = document.getElementById('report-year').value;
-            const prefix = `${year}-${month}`;
-            const dates = Object.keys(attendanceData).filter(d => d.startsWith(prefix)).sort();
-
-            if (dates.length === 0) {
-                alert("Tiada data pada bulan dipilih");
-                return;
-            }
-
-            const excelData = STUDENTS.map(s => {
-                const row = { 'Nama Murid': s.name, 'Kelas': s.class };
-                let total = 0;
-                dates.forEach(d => {
-                    const status = attendanceData[d][s.id] ? 'HADIR' : '-';
-                    row[d] = status;
-                    if(status === 'HADIR') total++;
-                });
-                row['JUMLAH'] = total;
-                return row;
-            });
-
-            const ws = XLSX.utils.json_to_sheet(excelData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Laporan");
-            XLSX.writeFile(wb, `Laporan_Kehadiran_${month}_${year}.xlsx`);
-        };
-
-        const updateBulkToggleBtn = (filtered) => {
-            if (filtered.length === 0) return;
-            const today = attendanceData[activeDateKey] || {};
-            const allTicked = filtered.every(s => !!today[s.id]);
-            const btn = document.getElementById('bulk-toggle-btn');
-            document.getElementById('bulk-toggle-text').innerText = allTicked ? "BATAL SEMUA" : "HADIR SEMUA";
-            btn.classList.toggle('bg-rose-600', allTicked);
-            btn.classList.toggle('bg-slate-800', !allTicked);
-        };
-
-        window.switchView = (v) => {
-            currentView = v;
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.replace('bg-blue-600', 'bg-white');
-                btn.classList.replace('text-white', 'text-blue-900');
-            });
-            document.getElementById(`nav-${v}`).classList.replace('bg-white', 'bg-blue-600');
-            document.getElementById(`nav-${v}`).classList.replace('text-blue-900', 'text-white');
-            ['kehadiran', 'rekod', 'rumusan'].forEach(view => {
-                document.getElementById(`view-${view}`).classList.toggle('hidden', view !== v);
-            });
-            refreshUI();
-        };
-
-        window.setClassFilter = (c) => { currentClassFilter = c; renderTabs(); refreshUI(); };
-        
-        const renderTabs = () => {
-            const tabs = ['ALL', ...classesList];
-            document.getElementById('year-tabs').innerHTML = tabs.map(t => `
-                <button onclick="setClassFilter('${t}')" class="whitespace-nowrap px-5 py-2 rounded-xl text-[10px] font-black border-2 transition-all ${currentClassFilter === t ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-400 border-slate-100'}">
-                    ${t === 'ALL' ? 'SEMUA' : t}
+        function setupTabs() {
+            const years = ['PPKI', '1', '2', '3', '4', '5', '6'];
+            yearTabsContainer.innerHTML = years.map(y => `
+                <button onclick="window.filterYear('${y}')" class="year-tab px-5 py-3 rounded-2xl bg-white text-slate-500 font-bold text-sm border-2 border-slate-100 whitespace-nowrap hover:bg-slate-100 transition-all ${y === currentFilter ? 'active' : ''}" data-year="${y}">
+                    ${y === 'PPKI' ? 'PPKI' : 'TAHUN ' + y}
                 </button>
             `).join('');
-        };
+        }
 
-        const init = async () => {
-            const datePicker = document.getElementById('attendance-date-picker');
-            datePicker.value = activeDateKey;
-            datePicker.addEventListener('change', (e) => {
-                activeDateKey = e.target.value;
-                refreshUI();
+        function setupListeners() {
+            datePicker.addEventListener('change', (e) => loadAttendance(e.target.value));
+            searchInput.addEventListener('input', renderStudents);
+        }
+
+        // --- Firebase Logic ---
+        async function loadAttendance(date) {
+            currentDate = date;
+            rekodDateLabel.innerText = new Date(date).toLocaleDateString('ms-MY');
+            
+            const docRef = doc(db, 'daily_attendance', date);
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    attendanceData = docSnap.data().students || [];
+                } else {
+                    attendanceData = [];
+                }
+                updateStats();
+                renderStudents();
+                renderRecordTable();
             });
+        }
 
-            const yearSelect = document.getElementById('report-year');
-            const now = new Date();
-            for(let y = 2025; y <= now.getFullYear() + 1; y++) {
-                const opt = document.createElement('option');
-                opt.value = y; opt.innerText = y;
-                if(y === now.getFullYear()) opt.selected = true;
-                yearSelect.appendChild(opt);
+        window.toggleAttendance = async (id) => {
+            const docRef = doc(db, 'daily_attendance', currentDate);
+            const isPresent = attendanceData.includes(id);
+
+            try {
+                await setDoc(docRef, {
+                    students: isPresent ? arrayRemove(id) : arrayUnion(id),
+                    lastUpdated: serverTimestamp()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Error updating:", e);
+                alert("Ralat sambungan. Sila cuba lagi.");
             }
-            document.getElementById('report-month').value = String(now.getMonth() + 1).padStart(2, '0');
-
-            await signInAnonymously(auth);
-            onAuthStateChanged(auth, (u) => { 
-                if(u) {
-                    onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance'), (snap) => {
-                        attendanceData = {};
-                        snap.forEach(d => attendanceData[d.id] = d.data());
-                        refreshUI();
-                    });
-                } 
-            });
-            renderTabs();
-            document.getElementById('search-input').addEventListener('input', renderStudents);
-            document.getElementById('report-month').addEventListener('change', renderRumusan);
-            document.getElementById('report-year').addEventListener('change', renderRumusan);
         };
 
-        window.onload = init;
+        window.resetDailyCount = async () => {
+            if(confirm("Adakah anda pasti mahu memadam SEMUA rekod kehadiran untuk tarikh ini?")) {
+                const docRef = doc(db, 'daily_attendance', currentDate);
+                await setDoc(docRef, { students: [] });
+            }
+        };
+
+        // --- UI Logic ---
+        window.filterYear = (year) => {
+            currentFilter = year;
+            document.querySelectorAll('.year-tab').forEach(b => {
+                b.classList.toggle('active', b.dataset.year === year);
+            });
+            renderStudents();
+        };
+
+        function renderStudents() {
+            const search = searchInput.value.toLowerCase();
+            const filtered = students.filter(s => {
+                const matchSearch = s.name.toLowerCase().includes(search);
+                const matchYear = currentFilter === 'PPKI' ? s.year === 'PPKI' : s.year === currentFilter;
+                return matchSearch && matchYear;
+            });
+
+            gridContainer.innerHTML = filtered.map(s => {
+                const isPresent = attendanceData.includes(s.id);
+                return `
+                <div onclick="window.toggleAttendance('${s.id}')" class="student-card p-5 rounded-3xl border-2 flex items-center justify-between shadow-sm hover:shadow-md ${isPresent ? 'bg-blue-50 border-blue-500' : 'bg-white border-white'}">
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 mb-1">${s.class}</p>
+                        <h3 class="text-xs font-black text-slate-800 uppercase leading-tight">${s.name}</h3>
+                    </div>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${isPresent ? 'bg-blue-600 text-white scale-110' : 'bg-slate-100 text-slate-300'}">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderRecordTable() {
+            const presentStudents = students.filter(s => attendanceData.includes(s.id));
+            rekodTableBody.innerHTML = presentStudents.map(s => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50/50">
+                    <td class="px-6 py-4 font-bold text-xs text-slate-700">${s.name}</td>
+                    <td class="px-6 py-4 font-bold text-[10px] text-slate-500 bg-slate-100 rounded-lg w-fit">${s.class}</td>
+                    <td class="px-6 py-4 text-center"><span class="text-emerald-500 font-black text-[10px]">HADIR</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats() {
+            todayCountEl.innerText = attendanceData.length;
+        }
+
+        // --- Navigation ---
+        window.switchView = (viewName) => {
+            ['kehadiran', 'rekod', 'rumusan'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+                document.getElementById(`nav-${v}`).classList.replace('bg-blue-600', 'bg-white');
+                document.getElementById(`nav-${v}`).classList.replace('text-white', 'text-blue-900');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            document.getElementById(`nav-${viewName}`).classList.replace('bg-white', 'bg-blue-600');
+            document.getElementById(`nav-${viewName}`).classList.replace('text-blue-900', 'text-white');
+        };
+
+        // --- Excel Export ---
+        window.exportReport = () => {
+            const data = students.map(s => ({
+                Nama: s.name,
+                Kelas: s.class,
+                Status: attendanceData.includes(s.id) ? "HADIR" : "TIDAK HADIR"
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Kehadiran");
+            XLSX.writeFile(wb, `Laporan_RMT_${currentDate}.xlsx`);
+        };
     </script>
 </body>
 </html>
-
-
-
-
-
-
